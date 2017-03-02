@@ -165,6 +165,7 @@ public class GenerateAndChangeLandscape : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         if (Input.GetMouseButtonDown(0)) {
+            // Debug.Log("Left Botton Detected");
             RaycastHit hit;
             // Ray ray = Camera.allCameras[0].ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
             Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
@@ -195,6 +196,7 @@ public class GenerateAndChangeLandscape : MonoBehaviour {
                 }
             }
         } else if (Input.GetMouseButtonDown(1)) {
+            // Debug.Log("Right Botton Detected");
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
             // Debug.Log(ray.direction);
