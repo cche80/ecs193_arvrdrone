@@ -159,24 +159,32 @@ public class CameraControl : MonoBehaviour {
     }
 
     void playerControl() {
-        if (Input.GetKey(KeyCode.D)) {
-            transform.Translate(new Vector3(playerControlSpeed * Time.deltaTime, 0, 0));
-        }
-        if (Input.GetKey(KeyCode.A)) {
-            transform.Translate(new Vector3(-playerControlSpeed * Time.deltaTime, 0, 0));
-        }
-        if (Input.GetKey(KeyCode.Q)) {
+        transform.Translate(new Vector3(Input.GetAxis("Horizontal") * playerControlSpeed * Time.deltaTime, 0, 0));
+        transform.Translate(new Vector3(0, 0, Input.GetAxis("Vertical") * playerControlSpeed * Time.deltaTime));
+        transform.Translate(new Vector3(0, Input.GetAxis("Xbox_R_Vertical") * playerControlSpeed * Time.deltaTime, 0));
+
+        if (Input.GetKey(KeyCode.Q))
+        {
             transform.Translate(new Vector3(0, -playerControlSpeed * Time.deltaTime, 0));
         }
-        if (Input.GetKey(KeyCode.E)) {
+        if (Input.GetKey(KeyCode.E))
+        {
             transform.Translate(new Vector3(0, playerControlSpeed * Time.deltaTime, 0));
         }
-        if (Input.GetKey(KeyCode.W)) {
-            transform.Translate(new Vector3(0, 0, playerControlSpeed * Time.deltaTime));
-        }
-        if (Input.GetKey(KeyCode.S)) {
-            transform.Translate(new Vector3(0, 0, -playerControlSpeed * Time.deltaTime));
-        }
+        /*
+                if (Input.GetKey(KeyCode.D)) {
+                    transform.Translate(new Vector3(playerControlSpeed * Time.deltaTime, 0, 0));
+                }
+                if (Input.GetKey(KeyCode.A)) {
+                    transform.Translate(new Vector3(-playerControlSpeed * Time.deltaTime, 0, 0));
+                }
+                if (Input.GetKey(KeyCode.W)) {
+                    transform.Translate(new Vector3(0, 0, playerControlSpeed * Time.deltaTime));
+                }
+                if (Input.GetKey(KeyCode.S)) {
+                    transform.Translate(new Vector3(0, 0, -playerControlSpeed * Time.deltaTime));
+                }
+        */
     }
 
     void move() {

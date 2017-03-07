@@ -247,7 +247,7 @@ public class GenerateAndChangeLandscape : MonoBehaviour {
         #endregion
 
         #region VR Version
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) || Input.GetButton("Xbox_L1"))
         {
             RaycastHit hit;
             // Ray ray = Camera.allCameras[0].ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
@@ -286,7 +286,7 @@ public class GenerateAndChangeLandscape : MonoBehaviour {
                 }
             }
         }
-        else if (Input.GetMouseButtonDown(1))
+        else if (Input.GetMouseButtonDown(1) || Input.GetButton("Xbox_R1"))
         {
             // Debug.Log("Right Botton Detected");
             RaycastHit hit;
