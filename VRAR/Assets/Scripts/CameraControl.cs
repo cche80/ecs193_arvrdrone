@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO.Ports;
 using System.Text;
+using UnityEngine.VR;
 
 public class CameraControl : MonoBehaviour {
     public bool DEBUG = false;
@@ -11,8 +12,8 @@ public class CameraControl : MonoBehaviour {
     private string DEVICE;
     private long TIME_STAMP;
     private bool STATUS;
-    private float LAT;
-    private float LON;
+    public float LAT;
+    public float LON;
     private float ALT;
     private int SAT;
     private int PREC;
@@ -23,9 +24,13 @@ public class CameraControl : MonoBehaviour {
     private float iniLON;
     private float iniALT;
 
+    //set gimbal control
+    [SerializeField]
+    VRNode m_VRNode = VRNode.Head;
+
     // Set the COM Port (COM4) and the BAUD Rate (9600 for XBee Connection).
-    private static string COMPort = "COM4";
-    private static int BAUDRate = 9600;
+    public static string COMPort = "COM3";
+    private static int BAUDRate = 115200;
     SerialPort streamCable = new SerialPort(COMPort, BAUDRate);
 
     private bool readDoneFlg;
@@ -46,12 +51,42 @@ public class CameraControl : MonoBehaviour {
     // Use this for initialization
     void Start() {
         Debug.Log("Start  ");
+        //start reading headset
+        StartCoroutine(EndOfFrameUpdate());
+        while (!streamCable.IsOpen)
+        {
+            streamCable.Open();
+        }
+
         firstGPSFlg = true;
         readDoneFlg = false;
         playerControlFlg = true;
         //streamCable.DataReceived += new SerialDataReceivedEventHandler(StreamCable_DataReceived);
         streamCable.ReadTimeout = 100;
         streamCable.Open(); //Open the Serial Stream.
+    }
+
+    private IEnumerator EndOfFrameUpdate()
+    {
+        while (true)
+        {
+            yield return new WaitForEndOfFrame();
+            LogRotation("EndOfFrame");
+        }
+    }
+
+    private void LogRotation(string id)
+    {
+        var quaternion = InputTracking.GetLocalRotation(m_VRNode);
+        var euler = quaternion.eulerAngles;
+        //Debug.Log(string.Format("{0} {1}, ({2}) Quaternion {3} Euler {4}", logPrefix, id, m_VRNode, quaternion.ToString("F2"), euler.ToString("F2")));
+        if (streamCable.IsOpen)
+        {
+            streamCable.WriteLine('X' + System.Convert.ToInt32(euler.x).ToString());
+            streamCable.WriteLine('Y' + System.Convert.ToInt32(euler.y).ToString());
+            //Debug.Log(System.Convert.ToInt32(euler.x).ToString() + ' ' + System.Convert.ToInt32(euler.y).ToString());
+            //Debug.Log(euler.ToString());
+        }
     }
 
     private void StreamCable_DataReceived(object sender, SerialDataReceivedEventArgs e) {
@@ -92,6 +127,7 @@ public class CameraControl : MonoBehaviour {
                 playerControlFlg = false;
             }
         }
+        LogRotation("Update");
     }
 
     bool readGPS() {
