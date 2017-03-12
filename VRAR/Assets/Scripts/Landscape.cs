@@ -355,6 +355,7 @@ public class Landscape : MonoBehaviour {
         #region VR Duo Reticle Version
         // Debug.Log(OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger));
         // Debug.Log(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch));
+        // Debug.Log();
         if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f)
         {
             RaycastHit hit;
