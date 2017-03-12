@@ -4,10 +4,6 @@ using System;
 using System.Collections.Generic;
 
 public class OvrAvatarLocalDriver : OvrAvatarDriver {
-    //
-    // Pass one of the camera from OVRCameraRig
-    //
-    public Camera _avatarCamera;
     float voiceAmplitude = 0.0f;
     ControllerPose GetControllerPose(OVRInput.Controller controller)
     {
@@ -59,10 +55,4 @@ public class OvrAvatarLocalDriver : OvrAvatarDriver {
         // Debug.Log(pose.headPosition);
         return true;
     }
-
-    void Update()
-    {
-        transform.position = _avatarCamera.transform.position;
-    }
-
 }

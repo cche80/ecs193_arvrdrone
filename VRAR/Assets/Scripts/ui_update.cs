@@ -10,11 +10,14 @@ public class ui_update : MonoBehaviour {
 	void Start () {
 		WebCamDevice[] devices = WebCamTexture.devices;
 		WebCamTexture webcamTexture = new WebCamTexture ();
-		webcamTexture.deviceName=devices[N_camera].name;
-
-		rawimage.texture = webcamTexture;
-		rawimage.material.mainTexture = webcamTexture;
-		webcamTexture.Play();
+        Debug.Log("Number of Camera: " + devices.Length);
+        if (devices.Length != 0)
+        {
+            webcamTexture.deviceName = devices[N_camera].name;
+            rawimage.texture = webcamTexture;
+            rawimage.material.mainTexture = webcamTexture;
+            webcamTexture.Play();
+        }
 	}
 	
 	// Update is called once per frame

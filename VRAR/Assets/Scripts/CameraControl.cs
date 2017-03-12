@@ -64,7 +64,10 @@ public class CameraControl : MonoBehaviour {
         playerControlFlg = true;
         //streamCable.DataReceived += new SerialDataReceivedEventHandler(StreamCable_DataReceived);
         streamCable.ReadTimeout = 100;
-        streamCable.Open(); //Open the Serial Stream.
+        if (!streamCable.IsOpen)
+        {
+            streamCable.Open(); //Open the Serial Stream.
+        }
     }
 
     private IEnumerator EndOfFrameUpdate()
