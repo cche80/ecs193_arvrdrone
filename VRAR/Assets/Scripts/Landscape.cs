@@ -47,20 +47,20 @@ public class Landscape : MonoBehaviour {
         for (int z = 0; z < _depth; z++) {
             for (int x = 0; x < _width; x++) {
                 // If you want just a flat plane
-                // int y = 0;
+                 int y = 0;
                 // If you want regular randomness:
                 // int y = (int)Random.Range(0, 10);
                 // If you want smooth randomness:
-                int y = (int)(Mathf.PerlinNoise((x + seed) / _detailScale, (z + seed) / _detailScale) * _heightScale) + _heightOffset;
+                //int y = (int)(Mathf.PerlinNoise((x + seed) / _detailScale, (z + seed) / _detailScale) * _heightScale) + _heightOffset;
                 Vector3 blockPos = new Vector3(x, y, z);
 
                 CreateBlock(y, blockPos, true);
-                while (y > 0) {
-                    y--;
+                //while (y > 0) {
+                //    y--;
                     // blockPos = new Vector3(x, y, z);
-                    blockPos.y = y;
-                    CreateBlock(y, blockPos, false);
-                }
+                //    blockPos.y = y;
+                //    CreateBlock(y, blockPos, false);
+                //}
             }
         }
 
@@ -75,7 +75,7 @@ public class Landscape : MonoBehaviour {
             if (create)
                 newBlock = (GameObject)Instantiate(_snowBlock, blockPos, Quaternion.identity);
             worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.snow, create, newBlock);
-        } else if (y > 5 + _heightOffset) {
+        } else if (y > 0) {
             if (create)
                 newBlock = (GameObject)Instantiate(_grassBlock, blockPos, Quaternion.identity);
             worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.grass, create, newBlock);
