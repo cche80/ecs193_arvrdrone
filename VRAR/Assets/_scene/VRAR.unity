@@ -405,6 +405,8 @@ MonoBehaviour:
   _snowBlock: {fileID: 1989995429927612, guid: 9cfbf59664768614a9840367f3b93b7e, type: 2}
   _cloudBlock: {fileID: 1537260184520508, guid: b8ce88841a4959348a71ddbd942ecfc3,
     type: 2}
+  _previewBlock: {fileID: 1413004990233084, guid: efc293496f912a94598b447cd7c5b724,
+    type: 2}
 --- !u!1 &602375242
 GameObject:
   m_ObjectHideFlags: 0

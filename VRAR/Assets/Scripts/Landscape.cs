@@ -1,8 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum BlockType { none, grass, sand, snow, cloud, maxBlock };
+public enum BlockType { none, grass, sand, snow, cloud, preview, maxBlock };
+public enum ConstructionMode { none, free, batch, batchHeight, maxMode };
 
 public class Block {
     public BlockType _type;
@@ -38,11 +40,25 @@ public class Landscape : MonoBehaviour {
     public GameObject _sandBlock;
     public GameObject _snowBlock;
     public GameObject _cloudBlock;
+    public GameObject _previewBlock;
+
+    // GameObjects Mapping array with their enum?
 
     Block[,,] worldBlocks = new Block[_width, _height, _depth];
 
+    // Mode Variables for Creating and Deleting Blocks
+    private ConstructionMode _constructionMode;
+
+    // Batch Mode Variables
+    Vector3 _batchStart;
+    Vector3 _batchEnd;
+    int _xStart, _xEnd;
+    int _zStart, _zEnd;
+    int _baseHeight;
+
     // Use this for initialization
     void Start() {
+        _constructionMode = ConstructionMode.free;
         int seed = (int)Network.time * 10;
         for (int z = 0; z < _depth; z++) {
             for (int x = 0; x < _width; x++) {
@@ -54,12 +70,12 @@ public class Landscape : MonoBehaviour {
                 int y = (int)(Mathf.PerlinNoise((x + seed) / _detailScale, (z + seed) / _detailScale) * _heightScale) + _heightOffset;
                 Vector3 blockPos = new Vector3(x, y, z);
 
-                CreateBlock(y, blockPos, true);
+                CreateBlock(blockPos, true);
                 while (y > 0) {
                     y--;
                     // blockPos = new Vector3(x, y, z);
                     blockPos.y = y;
-                    CreateBlock(y, blockPos, false);
+                    CreateBlock(blockPos, false);
                 }
             }
         }
@@ -67,36 +83,84 @@ public class Landscape : MonoBehaviour {
         CreateCloud(20, 100);
     }
 
-    void CreateBlock(int y, Vector3 blockPos, bool create) {
+    void CreateBlock(Vector3 blockPos, bool create) {
         if (blockPos.x < 0 || blockPos.x >= _width || blockPos.y < 0 || blockPos.y >= _height || blockPos.z < 0 || blockPos.x >= _depth) return;
+        if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] != null)
+        {
+            Destroy(worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block);
+        }
         GameObject newBlock = null;
+        int y = (int)blockPos.y;
 
         if (y > 15 + _heightOffset) {
             if (create)
-                newBlock = (GameObject)Instantiate(_snowBlock, blockPos, Quaternion.identity);
+                newBlock = Instantiate(_snowBlock, blockPos, Quaternion.identity);
             worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.snow, create, newBlock);
         } else if (y > 5 + _heightOffset) {
             if (create)
-                newBlock = (GameObject)Instantiate(_grassBlock, blockPos, Quaternion.identity);
+                newBlock = Instantiate(_grassBlock, blockPos, Quaternion.identity);
             worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.grass, create, newBlock);
         } else {
             if (create)
-                newBlock = (GameObject)Instantiate(_sandBlock, blockPos, Quaternion.identity);
+                newBlock = Instantiate(_sandBlock, blockPos, Quaternion.identity);
             worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.sand, create, newBlock);
+        }
+    }
+
+    private void CreateCustomBlock(BlockType blockType, Vector3 blockPos, bool create)
+    {
+        // Overflow prevention and clean up
+        if (blockPos.x < 0 || blockPos.x >= _width || blockPos.y < 0 || blockPos.y >= _height || blockPos.z < 0 || blockPos.x >= _depth) return;
+        if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] != null)
+        {
+            Destroy(worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block);
+        }
+
+        // Start Creating
+        GameObject newBlock = null;
+        switch(blockType)
+        {
+            case BlockType.snow:
+                if (create)
+                    newBlock = Instantiate(_snowBlock, blockPos, Quaternion.identity);
+                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.snow, create, newBlock);
+                break;
+            case BlockType.grass:
+                if (create)
+                    newBlock = Instantiate(_grassBlock, blockPos, Quaternion.identity);
+                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.grass, create, newBlock);
+                break;
+            case BlockType.sand:
+                if (create)
+                    newBlock = Instantiate(_sandBlock, blockPos, Quaternion.identity);
+                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.sand, create, newBlock);
+                break;
+            case BlockType.cloud:
+                if (create)
+                    newBlock = Instantiate(_cloudBlock, blockPos, Quaternion.identity);
+                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.cloud, create, newBlock);
+                break;
+            case BlockType.preview:
+                if (create)
+                    newBlock = Instantiate(_previewBlock, blockPos, Quaternion.identity);
+                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.preview, create, newBlock);
+                break;
+            default:
+                break;
         }
     }
 
     void CreateCloud(int numClouds, int cSize) {
         for (int i = 0; i < numClouds; i++) {
-            int xpos = Random.Range(0, _width - 1);
-            int zpos = Random.Range(0, _depth - 1);
+            int xpos = UnityEngine.Random.Range(0, _width - 1);
+            int zpos = UnityEngine.Random.Range(0, _depth - 1);
             for (int j = 0; j < cSize; j++) {
                 Vector3 blockPos = new Vector3(xpos, _height - 1, zpos);
                 GameObject newBlock = (GameObject)Instantiate(_cloudBlock, blockPos, Quaternion.identity);
                 // Debug.Log(blockPos);
                 worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = new Block(BlockType.cloud, true, newBlock);
-                xpos += Random.Range(-1, 2);
-                zpos += Random.Range(-1, 2);
+                xpos += UnityEngine.Random.Range(-1, 2);
+                zpos += UnityEngine.Random.Range(-1, 2);
                 if (xpos < 0 || xpos >= _width) xpos = _width / 2;
                 if (zpos < 0 || zpos >= _depth) zpos = _depth / 2;
             }
@@ -115,11 +179,11 @@ public class Landscape : MonoBehaviour {
             GameObject newBlock = null;
             worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._vis = true;
             if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._type == BlockType.grass) {
-                newBlock = (GameObject)Instantiate(_grassBlock, blockPos, Quaternion.identity);
+                newBlock = Instantiate(_grassBlock, blockPos, Quaternion.identity);
             } else if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._type == BlockType.sand) {
-                newBlock = (GameObject)Instantiate(_sandBlock, blockPos, Quaternion.identity);
+                newBlock = Instantiate(_sandBlock, blockPos, Quaternion.identity);
             } else if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._type == BlockType.snow) {
-                newBlock = (GameObject)Instantiate(_snowBlock, blockPos, Quaternion.identity);
+                newBlock = Instantiate(_snowBlock, blockPos, Quaternion.identity);
             } else {
                 worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._vis = false;
             }
@@ -353,110 +417,289 @@ public class Landscape : MonoBehaviour {
         #endregion
 
         #region VR Duo Reticle Version
-        // Debug.Log(OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger));
-        // Debug.Log(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch));
-        // Debug.Log();
-        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f)
+        if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f)
         {
-            RaycastHit hit;
-            // Ray ray = Camera.allCameras[0].ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
-            // Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
-            // Debug.Log(ray);
-            if (Physics.Raycast(new Ray(_CameraFacing.transform.position + OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch),
-                                     OVRInput.GetLocalControllerRotation(OVRInput.Controller.LTouch) * Vector3.forward),
-                                     out hit, 5000.0f))
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.LTouch);
+            if (rayCastAnswer.valid)
             {
-                Vector3 blockPos = hit.transform.position;
-
+                Vector3 blockPos = rayCastAnswer.blockPos;
                 // this is the bottom block. Don't delete it!!!!
                 if ((int)blockPos.y == 0) return;
-
+                // Delete from the structure and the Unity world
                 worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
-
-                Destroy(hit.transform.gameObject);
-
-                //
+                Destroy(rayCastAnswer.block);
                 // Show hidden structure underneath
                 // Only instantiate hidden blocks when they are on demand!
-                //
-                for (int x = -1; x <= 1; x++)
-                {
-                    for (int y = -1; y <= 1; y++)
-                    {
-                        for (int z = -1; z <= 1; z++)
-                        {
-                            if (!(x == 0 && y == 0 && z == 0))
-                            {
-                                Vector3 neighbour = new Vector3(blockPos.x + x, blockPos.y + y, blockPos.z + z);
-                                DrawBlock(neighbour);
-                            }
-                        }
-                    }
-                }
+                showHiddenBlockAround(blockPos);
             }
         }
-        else if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) > 0.5f)
+        else if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) > 0.5f)
         {
-            // Debug.Log("Right Botton Detected");
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
-            // Debug.DrawRay(ray.origin, ray.direction * 10, Color.red);
-            // Debug.Log(ray.direction);
-            if (Physics.Raycast(new Ray(_CameraFacing.transform.position + OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch),
-                                     OVRInput.GetLocalControllerRotation(OVRInput.Controller.LTouch) * Vector3.forward),
-                                     out hit, 5000.0f))
+            RayCastReturn rayCastAnswer = rayCastBlockCreation(OVRInput.Controller.LTouch);
+            if (rayCastAnswer.valid)
             {
-                Vector3 blockPos = hit.transform.position;
-                Vector3 hitVector = blockPos - hit.point;
-
-                hitVector.x = Mathf.Abs(hitVector.x);
-                hitVector.y = Mathf.Abs(hitVector.y);
-                hitVector.z = Mathf.Abs(hitVector.z);
-
-                // Debug.Log(ray.direction);
-
-                if (hitVector.x > hitVector.z && hitVector.x > hitVector.y)
-                {
-                    // blockPos.x -= (int)Mathf.RoundToInt(ray.direction.x);
-                    if (ray.direction.x > 0)
-                    {
-                        blockPos.x -= 1;
-                    }
-                    else
-                    {
-                        blockPos.x += 1;
-                    }
-                }
-                else if (hitVector.y > hitVector.x && hitVector.y > hitVector.z)
-                {
-                    // blockPos.y -= (int)Mathf.RoundToInt(ray.direction.y);
-                    if (ray.direction.y > 0)
-                    {
-                        blockPos.y -= 1;
-                    }
-                    else
-                    {
-                        blockPos.y += 1;
-                    }
-                }
-                else
-                {
-                    // blockPos.z -= (int)Mathf.RoundToInt(ray.direction.z);
-                    if (ray.direction.z > 0)
-                    {
-                        blockPos.z -= 1;
-                    }
-                    else
-                    {
-                        blockPos.z += 1;
-                    }
-                }
-
-
-                CreateBlock((int)blockPos.y, blockPos, true);
+                Vector3 blockPos = rayCastAnswer.blockPos;
+                CreateBlock(blockPos, true);
+                // Hide obscured neighbours
                 CheckObscuredNeighbours(blockPos);
             }
         }
+        else if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.RawButton.B))
+        {
+            // Switch mode to batch
+            _constructionMode = ConstructionMode.batch;
+            // ray cast to obtain the starting block
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
+            if (rayCastAnswer.valid)
+            {
+                _batchStart = rayCastAnswer.blockPos;
+                _batchEnd = _batchStart;
+                // Debug.Log("batchStart: " + _batchStart);
+                // Debug.Log("batchEnd: " + _batchEnd);
+            }
+        }
+        else if (_constructionMode == ConstructionMode.batch && OVRInput.Get(OVRInput.RawButton.B))
+        {
+            // ray cast to update the ending block
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
+            if (rayCastAnswer.valid)
+            {
+                _batchEnd = rayCastAnswer.blockPos;
+                // Debug.Log("batchEnd: " + _batchEnd);
+            }
+        }
+        else if (_constructionMode == ConstructionMode.batch && !OVRInput.Get(OVRInput.RawButton.B))
+        {
+            // Switch to batchHeight mode for height adjustment when button B is released
+            _constructionMode = ConstructionMode.batchHeight;
+
+            // Create a rectengular base
+            // Get the heigher among the two points and match all the points with that height if possible.
+            _baseHeight = (int)Math.Max(_batchStart.y, _batchEnd.y);
+
+            // determine the right incremental starting and ending point
+            if (_batchEnd.x - _batchStart.x >= 0)
+            {
+                _xStart = (int)_batchStart.x;
+                _xEnd = (int)_batchEnd.x;
+            }
+            else
+            {
+                _xEnd = (int)_batchStart.x;
+                _xStart = (int)_batchEnd.x;
+            }
+
+            if (_batchEnd.z - _batchStart.z >= 0)
+            {
+                _zStart = (int)_batchStart.z;
+                _zEnd = (int)_batchEnd.z;
+            }
+            else
+            {
+                _zEnd = (int)_batchStart.z;
+                _zStart = (int)_batchEnd.z;
+            }
+
+            // iterate through the book keeping structure
+            // Start actually creating blocks when hits the surface
+            bool surfaceFlag = false;
+            for (int x = _xStart; x <= _xEnd; x++)
+            {
+                for (int z = _zStart; z <= _zEnd; z++)
+                {
+                    // Create Actual Blocks for the structure
+                    surfaceFlag = false;
+                    for (int y = 0; y <= _baseHeight; y++)
+                    {
+                        if (!surfaceFlag && worldBlocks[x, y, z] != null && worldBlocks[x, y, z]._vis)
+                        {
+                            surfaceFlag = true;
+                        } else if (surfaceFlag)
+                        {
+                            Vector3 blockPos = new Vector3(x, y, z);
+                            CreateBlock(blockPos, true);
+                            // Hide obscured neighbours
+                            CheckObscuredNeighbours(blockPos);
+                        }
+                    }
+
+                    // Create Preview Blocks for batchHeight Mode
+                    for (int y = _baseHeight + 1; y <= _height - 50; y++)
+                    {
+                        Vector3 blockPos = new Vector3(x, y, z);
+                        CreateCustomBlock(BlockType.preview, blockPos, true);
+                        // Hide obscured neighbours
+                        CheckObscuredNeighbours(blockPos);
+                    }
+                }
+            }
+
+            // Create Preview Blocks up to _height - 3 in order to be separated from the cloud.
+
+        }
+        else if (_constructionMode == ConstructionMode.batchHeight && OVRInput.Get(OVRInput.RawButton.A))
+        {
+            // Switch back to free mode since this is the last step of batch Mode
+            _constructionMode = ConstructionMode.free;
+
+            // Finish Creating the block + clean up preview blocks
+            // ray cast to get the intended height of the geometric structure
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
+            Vector3 heightPos = Vector3.zero;
+            if (rayCastAnswer.valid)
+            {
+                heightPos = rayCastAnswer.blockPos;
+                // Debug.Log("Intended Height: " + _batchEnd);
+            }
+            int intendedHeight = (int)Math.Max(heightPos.y, _baseHeight);
+            for (int x = _xStart; x <= _xEnd; x++)
+            {
+                for (int z = _zStart; z <= _zEnd; z++)
+                {
+                    // Create Actual Blocks for the structure up to the intended height
+                    for (int y = _baseHeight + 1; y <= intendedHeight; y++)
+                    {
+                        Vector3 blockPos = new Vector3(x, y, z);
+                        CreateBlock(blockPos, true);
+                        // Hide obscured neighbours
+                        CheckObscuredNeighbours(blockPos);
+                    }
+
+                    // Delete Preview Blocks that are irrelevant
+                    for (int y = intendedHeight + 1; y <= _height - 50; y++)
+                    {
+                        Vector3 blockPos = new Vector3(x, y, z);
+                        if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] != null)
+                        {
+                            Destroy(worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block);
+                            worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
+                        }
+                        // Show hidden structure underneath
+                        // Only instantiate hidden blocks when they are on demand!
+                        showHiddenBlockAround(blockPos);
+                    }
+                }
+            }
+        }
         #endregion
+    }
+
+    private void showHiddenBlockAround(Vector3 blockPos)
+    {
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                for (int z = -1; z <= 1; z++)
+                {
+                    if (!(x == 0 && y == 0 && z == 0))
+                    {
+                        Vector3 neighbour = new Vector3(blockPos.x + x, blockPos.y + y, blockPos.z + z);
+                        DrawBlock(neighbour);
+                    }
+                }
+            }
+        }
+    }
+
+    private RayCastReturn rayCastBlockDeletion(OVRInput.Controller controller)
+    {
+        RaycastHit hit;
+        // Ray ray = Camera.allCameras[0].ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
+        // Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
+        // Debug.Log(ray);
+        RayCastReturn ans;
+        if (Physics.Raycast(new Ray(_CameraFacing.transform.position + OVRInput.GetLocalControllerPosition(controller),
+                    OVRInput.GetLocalControllerRotation(controller) * Vector3.forward),
+                    out hit, 5000.0f))
+        {
+            ans.block = hit.transform.gameObject;
+            ans.blockPos = hit.transform.position;
+            ans.valid = true;
+        }
+        else
+        {
+            ans.block = null;
+            ans.blockPos = Vector3.zero;
+            ans.valid = false;
+        }
+        return ans;
+    }
+
+    private RayCastReturn rayCastBlockCreation(OVRInput.Controller controller)
+    {
+        // Debug.Log("Right Botton Detected");
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
+        // Debug.DrawRay(ray.origin, ray.direction * 10, Color.red);
+        // Debug.Log(ray.direction);
+        RayCastReturn ans;
+        ans.block = null;
+        if (Physics.Raycast(new Ray(_CameraFacing.transform.position + OVRInput.GetLocalControllerPosition(controller),
+                                 OVRInput.GetLocalControllerRotation(controller) * Vector3.forward),
+                                 out hit, 5000.0f))
+        {
+            Vector3 blockPos = hit.transform.position;
+            Vector3 hitVector = blockPos - hit.point;
+
+            hitVector.x = Mathf.Abs(hitVector.x);
+            hitVector.y = Mathf.Abs(hitVector.y);
+            hitVector.z = Mathf.Abs(hitVector.z);
+
+            // Debug.Log(ray.direction);
+
+            if (hitVector.x > hitVector.z && hitVector.x > hitVector.y)
+            {
+                // blockPos.x -= (int)Mathf.RoundToInt(ray.direction.x);
+                if (ray.direction.x > 0)
+                {
+                    blockPos.x -= 1;
+                }
+                else
+                {
+                    blockPos.x += 1;
+                }
+            }
+            else if (hitVector.y > hitVector.x && hitVector.y > hitVector.z)
+            {
+                // blockPos.y -= (int)Mathf.RoundToInt(ray.direction.y);
+                if (ray.direction.y > 0)
+                {
+                    blockPos.y -= 1;
+                }
+                else
+                {
+                    blockPos.y += 1;
+                }
+            }
+            else
+            {
+                // blockPos.z -= (int)Mathf.RoundToInt(ray.direction.z);
+                if (ray.direction.z > 0)
+                {
+                    blockPos.z -= 1;
+                }
+                else
+                {
+                    blockPos.z += 1;
+                }
+            }
+
+            ans.blockPos = blockPos;
+            ans.valid = true;
+        }
+        else
+        {
+            ans.blockPos = Vector3.zero;
+            ans.valid = false;
+        }
+        return ans;
+    }
+
+    public struct RayCastReturn
+    {
+        public GameObject block;
+        public Vector3 blockPos;
+        public bool valid;
     }
 }
