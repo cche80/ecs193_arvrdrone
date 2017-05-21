@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -56,6 +57,8 @@ public class Landscape : MonoBehaviour {
     int _zStart, _zEnd;
     int _baseHeight;
 
+    LandscapeStructure landscapeStructure;
+
     // Use this for initialization
     void Start() {
         _constructionMode = ConstructionMode.free;
@@ -81,9 +84,63 @@ public class Landscape : MonoBehaviour {
         }
 
         CreateCloud(20, 100);
+
+        // Load landscapeStructure
+        landscapeStructure = loadLandscapeStructure("Data/tree.data");
+        // Debug.Log(tree.blockType);
     }
 
-    void CreateBlock(Vector3 blockPos, bool create) {
+    private LandscapeStructure loadLandscapeStructure(string fileName)
+    {
+        BlockType[,,] data = null;
+
+        try
+        {
+            using (StreamReader reader = new StreamReader(fileName))
+            {
+                int width = int.Parse(reader.ReadLine());
+                int height = int.Parse(reader.ReadLine());
+                int depth = int.Parse(reader.ReadLine());
+
+                int xBase = int.Parse(reader.ReadLine());
+                int yBase = int.Parse(reader.ReadLine());
+                int zBase = int.Parse(reader.ReadLine());
+
+                data = new BlockType[width, height, depth];
+
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < depth; j++)
+                    {
+                        string s = reader.ReadLine();
+                        for (int k = 0; k < height; k++)
+                        {
+                            data[i, k, j] = (s[k] == '0' ? BlockType.none : BlockType.grass);
+                        }
+                    }
+                }
+
+                Debug.Log(width);
+                Debug.Log(height);
+                Debug.Log(depth);
+
+                LandscapeStructure result = new LandscapeStructure();
+                result.blockType = data;
+                result.center.x = xBase;
+                result.center.y = yBase;
+                result.center.z = zBase;
+                return result;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("File reading failed: ");
+            Debug.Log(e.Message);
+        }
+        return null;
+    }
+
+    private void CreateBlock(Vector3 blockPos, bool create) {
         if (blockPos.x < 0 || blockPos.x >= _width || blockPos.y < 0 || blockPos.y >= _height || blockPos.z < 0 || blockPos.x >= _depth) return;
         if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] != null)
         {
@@ -107,8 +164,13 @@ public class Landscape : MonoBehaviour {
         }
     }
 
-    private void CreateCustomBlock(BlockType blockType, Vector3 blockPos, bool create)
+    private void CreateCustomBlock(BlockType blockType, Vector3 blockPos, bool create, bool deleteEmpty)
     {
+        if (blockType == BlockType.none && deleteEmpty == false)
+        {
+            return;
+        }
+
         // Overflow prevention and clean up
         if (blockPos.x < 0 || blockPos.x >= _width || blockPos.y < 0 || blockPos.y >= _height || blockPos.z < 0 || blockPos.x >= _depth) return;
         if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] != null)
@@ -118,7 +180,7 @@ public class Landscape : MonoBehaviour {
 
         // Start Creating
         GameObject newBlock = null;
-        switch(blockType)
+        switch (blockType)
         {
             case BlockType.snow:
                 if (create)
@@ -150,7 +212,12 @@ public class Landscape : MonoBehaviour {
         }
     }
 
-    void CreateCloud(int numClouds, int cSize) {
+    private void CreateCustomBlock(BlockType blockType, Vector3 blockPos, bool create)
+    {
+        CreateCustomBlock(blockType, blockPos, create, true);
+    }
+
+    private void CreateCloud(int numClouds, int cSize) {
         for (int i = 0; i < numClouds; i++) {
             int xpos = UnityEngine.Random.Range(0, _width - 1);
             int zpos = UnityEngine.Random.Range(0, _depth - 1);
@@ -444,6 +511,30 @@ public class Landscape : MonoBehaviour {
                 CheckObscuredNeighbours(blockPos);
             }
         }
+        else if (_constructionMode == ConstructionMode.free && OVRInput.GetDown(OVRInput.RawButton.X))
+        {
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.LTouch);
+            if (rayCastAnswer.valid)
+            {
+                Vector3 baseIndex = rayCastAnswer.blockPos - landscapeStructure.center;
+                for (int i = 0; i < landscapeStructure.blockType.GetLength(0); i++)
+                {
+                    for (int j = 0; j < landscapeStructure.blockType.GetLength(1); j++)
+                    {
+                        for (int k = 0; k < landscapeStructure.blockType.GetLength(2); k++)
+                        {
+                            Vector3 curIndex = new Vector3(baseIndex.x + i, baseIndex.y + j, baseIndex.z + k);
+                            CreateCustomBlock(landscapeStructure.blockType[i, j, k], curIndex, true, false);
+                        }
+                    }
+                }
+
+
+                // rayCastAnswer.blockPos;
+                // Debug.Log("batchStart: " + _batchStart);
+                // Debug.Log("batchEnd: " + _batchEnd);
+            }
+        }
         else if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.RawButton.B))
         {
             // Switch mode to batch
@@ -701,5 +792,11 @@ public class Landscape : MonoBehaviour {
         public GameObject block;
         public Vector3 blockPos;
         public bool valid;
+    }
+
+    public class LandscapeStructure
+    {
+        public BlockType[,,] blockType;
+        public Vector3 center;
     }
 }
