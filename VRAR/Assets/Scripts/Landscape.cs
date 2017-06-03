@@ -57,7 +57,18 @@ public class Landscape : MonoBehaviour {
     int _zStart, _zEnd;
     int _baseHeight;
 
+    // Pre-constructed landscape
     LandscapeStructure landscapeStructure;
+
+    // Haptics
+    public AudioClip vibeClip_0_05;
+
+    // Touch Controller
+    bool primaryIndexInUse = false;
+    bool primaryHandInUse = false;
+
+    // Change Texture/bricktype
+    BlockType blockType = BlockType.grass;
 
     // Use this for initialization
     void Start() {
@@ -209,6 +220,17 @@ public class Landscape : MonoBehaviour {
                 break;
             default:
                 break;
+        }
+
+        // Change color according to color bar if block type is preview block
+        if (newBlock != null && blockType == BlockType.cloud)
+        {
+            Renderer rend = newBlock.transform.GetComponent<Renderer>();
+            if (rend)
+            {
+                GameObject pcp = GameObject.Find("PresetColorPicker");
+                rend.material.SetColor("_Color", pcp.GetComponent<MyColorPicker>().color);
+            }
         }
     }
 
@@ -484,8 +506,39 @@ public class Landscape : MonoBehaviour {
         #endregion
 
         #region VR Duo Reticle Version
-        if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f)
+        // Touch Controller States
+        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) == 0.0f)
         {
+            primaryIndexInUse = false;
+        }
+
+        if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) == 0.0f)
+        {
+            primaryHandInUse = false;
+        }
+
+        // change block type
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            blockType++;
+            if (blockType == BlockType.preview)
+            {
+                blockType = BlockType.grass;
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            blockType--;
+            if (blockType == BlockType.none)
+            {
+                blockType = BlockType.cloud;
+            }
+        }
+
+            if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f && primaryIndexInUse == false)
+        {
+            OVRHaptics.Channels[0].Mix(new OVRHapticsClip(vibeClip_0_05));
             RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.LTouch);
             if (rayCastAnswer.valid)
             {
@@ -499,17 +552,23 @@ public class Landscape : MonoBehaviour {
                 // Only instantiate hidden blocks when they are on demand!
                 showHiddenBlockAround(blockPos);
             }
+
+            primaryIndexInUse = true;
         }
-        else if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) > 0.5f)
+        else if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) > 0.5f && primaryHandInUse == false)
         {
+            OVRHaptics.Channels[0].Mix(new OVRHapticsClip(vibeClip_0_05));
             RayCastReturn rayCastAnswer = rayCastBlockCreation(OVRInput.Controller.LTouch);
             if (rayCastAnswer.valid)
             {
                 Vector3 blockPos = rayCastAnswer.blockPos;
-                CreateBlock(blockPos, true);
+                CreateCustomBlock(blockType, blockPos, true);
+                // CreateBlock(blockPos, true);
                 // Hide obscured neighbours
                 CheckObscuredNeighbours(blockPos);
             }
+
+            primaryHandInUse = true;
         }
         else if (_constructionMode == ConstructionMode.free && OVRInput.GetDown(OVRInput.RawButton.X))
         {
@@ -608,7 +667,8 @@ public class Landscape : MonoBehaviour {
                         } else if (surfaceFlag)
                         {
                             Vector3 blockPos = new Vector3(x, y, z);
-                            CreateBlock(blockPos, true);
+                            CreateCustomBlock(blockType, blockPos, true);
+                            // CreateBlock(blockPos, true);
                             // Hide obscured neighbours
                             CheckObscuredNeighbours(blockPos);
                         }
@@ -651,7 +711,8 @@ public class Landscape : MonoBehaviour {
                     for (int y = _baseHeight + 1; y <= intendedHeight; y++)
                     {
                         Vector3 blockPos = new Vector3(x, y, z);
-                        CreateBlock(blockPos, true);
+                        CreateCustomBlock(blockType, blockPos, true);
+                        // CreateBlock(blockPos, true);
                         // Hide obscured neighbours
                         CheckObscuredNeighbours(blockPos);
                     }

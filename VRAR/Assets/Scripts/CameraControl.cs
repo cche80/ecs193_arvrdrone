@@ -25,6 +25,10 @@ public class CameraControl : MonoBehaviour {
     private float iniLON;
     private float iniALT;
 
+    private int init_x = -1;
+    private int init_y = -1;
+
+
     //set gimbal control
     [SerializeField]
     VRNode m_VRNode = VRNode.Head;
@@ -79,17 +83,49 @@ public class CameraControl : MonoBehaviour {
         }
     }
 
+    private int find_diff(int new_v, int init_v)
+    {
+        if (new_v >= init_v)
+        {
+            if (new_v - init_v <= 180)
+            {
+                return new_v - init_v;
+            }else
+            {
+                return 0 - ((360 - new_v) + init_v);
+            }
+        }else
+        {
+            if(new_v - init_v >= -180)
+            {
+                return new_v - init_v;
+            }else
+            {
+                return (360 - init_v) + new_v;
+            }
+        }
+    }
+
     private void LogRotation(string id)
     {
         var quaternion = InputTracking.GetLocalRotation(m_VRNode);
         var euler = quaternion.eulerAngles;
+        if (init_x == -1 || init_y == -1)
+        {
+            init_x = System.Convert.ToInt32(euler.x);
+            init_y = System.Convert.ToInt32(euler.y);
+            return;
+        }
         //Debug.Log(string.Format("{0} {1}, ({2}) Quaternion {3} Euler {4}", logPrefix, id, m_VRNode, quaternion.ToString("F2"), euler.ToString("F2")));
+        int new_x = System.Convert.ToInt32(euler.x);
+        int new_y = System.Convert.ToInt32(euler.y);
+
         if (streamCable.IsOpen)
         {
-            streamCable.WriteLine('X' + System.Convert.ToInt32(euler.x).ToString());
-            streamCable.WriteLine('Y' + System.Convert.ToInt32(euler.y).ToString());
-            //Debug.Log(System.Convert.ToInt32(euler.x).ToString() + ' ' + System.Convert.ToInt32(euler.y).ToString());
-            //Debug.Log(euler.ToString());
+            streamCable.WriteLine('X' + (90 - find_diff(new_x, init_x)).ToString());
+            streamCable.WriteLine('Y' + (90 + find_diff(new_y, init_y)).ToString());
+            Debug.Log('X' + (90 + find_diff(new_x, init_x)).ToString() + ' ' + 'Y' + (90 + find_diff(new_y, init_y)).ToString());
+            Debug.Log(euler.ToString());
         }
     }
 
