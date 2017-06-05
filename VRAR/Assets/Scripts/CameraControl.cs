@@ -124,8 +124,8 @@ public class CameraControl : MonoBehaviour {
         {
             streamCable.WriteLine('X' + (90 - find_diff(new_x, init_x)).ToString());
             streamCable.WriteLine('Y' + (90 + find_diff(new_y, init_y)).ToString());
-            Debug.Log('X' + (90 + find_diff(new_x, init_x)).ToString() + ' ' + 'Y' + (90 + find_diff(new_y, init_y)).ToString());
-            Debug.Log(euler.ToString());
+            // Debug.Log('X' + (90 + find_diff(new_x, init_x)).ToString() + ' ' + 'Y' + (90 + find_diff(new_y, init_y)).ToString());
+            // Debug.Log(euler.ToString());
         }
     }
 

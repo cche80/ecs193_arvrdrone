@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class ui_update : MonoBehaviour {
 	public RawImage rawimage;
-    public int N_camera = 2;
+    public int N_camera = 1;
 	// Use this for initialization
 	void Start () {
 		WebCamDevice[] devices = WebCamTexture.devices;

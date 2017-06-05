@@ -66,6 +66,8 @@ public class Landscape : MonoBehaviour {
     // Touch Controller
     bool primaryIndexInUse = false;
     bool primaryHandInUse = false;
+    bool secondaryIndexInUse = false;
+    bool secondaryHandInUse = false;
 
     // Change Texture/bricktype
     BlockType blockType = BlockType.grass;
@@ -99,6 +101,566 @@ public class Landscape : MonoBehaviour {
         // Load landscapeStructure
         landscapeStructure = loadLandscapeStructure("Data/tree.data");
         // Debug.Log(tree.blockType);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+        #region Screen Version
+        /*
+        if (Input.GetMouseButtonDown(0)) {
+            // Debug.Log("Left Botton Detected");
+            RaycastHit hit;
+            // Ray ray = Camera.allCameras[0].ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
+            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
+            // Debug.Log(ray);
+            if (Physics.Raycast(ray, out hit, 5000.0f)) {
+                Vector3 blockPos = hit.transform.position;
+
+                // this is the bottom block. Don't delete it!!!!
+                if ((int)blockPos.y == 0) return;
+
+                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
+
+                Destroy(hit.transform.gameObject);
+
+                //
+                // Show hidden structure underneath
+                // Only instantiate hidden blocks when they are on demand!
+                //
+                for (int x = -1; x <= 1; x++) {
+                    for (int y = -1; y <= 1; y++) {
+                        for (int z = -1; z <= 1; z++) {
+                            if (!(x == 0 && y == 0 && z == 0)) {
+                                Vector3 neighbour = new Vector3(blockPos.x + x, blockPos.y + y, blockPos.z + z);
+                                DrawBlock(neighbour);
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (Input.GetMouseButtonDown(1)) {
+            // Debug.Log("Right Botton Detected");
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
+            // Debug.Log(ray.direction);
+            if (Physics.Raycast(ray, out hit, 5000.0f)) {
+                Vector3 blockPos = hit.transform.position;
+                Vector3 hitVector = blockPos - hit.point;
+
+                hitVector.x = Mathf.Abs(hitVector.x);
+                hitVector.y = Mathf.Abs(hitVector.y);
+                hitVector.z = Mathf.Abs(hitVector.z);
+
+                // Debug.Log(ray.direction);
+
+                if (hitVector.x > hitVector.z && hitVector.x > hitVector.y) {
+                    // blockPos.x -= (int)Mathf.RoundToInt(ray.direction.x);
+                    if (ray.direction.x > 0) {
+                        blockPos.x -= 1;
+                    } else {
+                        blockPos.x += 1;
+                    }
+                } else if (hitVector.y > hitVector.x && hitVector.y > hitVector.z) {
+                    // blockPos.y -= (int)Mathf.RoundToInt(ray.direction.y);
+                    if (ray.direction.y > 0) {
+                        blockPos.y -= 1;
+                    } else {
+                        blockPos.y += 1;
+                    }
+                } else {
+                    // blockPos.z -= (int)Mathf.RoundToInt(ray.direction.z);
+                    if (ray.direction.z > 0) {
+                        blockPos.z -= 1;
+                    } else {
+                        blockPos.z += 1;
+                    }
+                }
+
+
+                CreateBlock((int)blockPos.y, blockPos, true);
+                CheckObscuredNeighbours(blockPos);
+            }
+        }
+        */
+        #endregion
+
+        #region VR Single Reticle Version
+        /*
+        if (Input.GetMouseButtonDown(0) || Input.GetButton("Xbox_L1"))
+        {
+            RaycastHit hit;
+            // Ray ray = Camera.allCameras[0].ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
+            // Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
+            // Debug.Log(ray);
+            if (Physics.Raycast(new Ray(_CameraFacing.transform.position,
+                                     _CameraFacing.transform.rotation * Vector3.forward),
+                                     out hit, 5000.0f))
+            {
+                Vector3 blockPos = hit.transform.position;
+
+                // this is the bottom block. Don't delete it!!!!
+                if ((int)blockPos.y == 0) return;
+
+                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
+
+                Destroy(hit.transform.gameObject);
+
+                //
+                // Show hidden structure underneath
+                // Only instantiate hidden blocks when they are on demand!
+                //
+                for (int x = -1; x <= 1; x++)
+                {
+                    for (int y = -1; y <= 1; y++)
+                    {
+                        for (int z = -1; z <= 1; z++)
+                        {
+                            if (!(x == 0 && y == 0 && z == 0))
+                            {
+                                Vector3 neighbour = new Vector3(blockPos.x + x, blockPos.y + y, blockPos.z + z);
+                                DrawBlock(neighbour);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if (Input.GetMouseButtonDown(1) || Input.GetButton("Xbox_R1"))
+        {
+            // Debug.Log("Right Botton Detected");
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
+            // Debug.DrawRay(ray.origin, ray.direction * 10, Color.red);
+            // Debug.Log(ray.direction);
+            if (Physics.Raycast(new Ray(_CameraFacing.transform.position,
+                                     _CameraFacing.transform.rotation * Vector3.forward),
+                                     out hit, 5000.0f))
+            {
+                Vector3 blockPos = hit.transform.position;
+                Vector3 hitVector = blockPos - hit.point;
+
+                hitVector.x = Mathf.Abs(hitVector.x);
+                hitVector.y = Mathf.Abs(hitVector.y);
+                hitVector.z = Mathf.Abs(hitVector.z);
+
+                // Debug.Log(ray.direction);
+
+                if (hitVector.x > hitVector.z && hitVector.x > hitVector.y)
+                {
+                    // blockPos.x -= (int)Mathf.RoundToInt(ray.direction.x);
+                    if (ray.direction.x > 0)
+                    {
+                        blockPos.x -= 1;
+                    }
+                    else
+                    {
+                        blockPos.x += 1;
+                    }
+                }
+                else if (hitVector.y > hitVector.x && hitVector.y > hitVector.z)
+                {
+                    // blockPos.y -= (int)Mathf.RoundToInt(ray.direction.y);
+                    if (ray.direction.y > 0)
+                    {
+                        blockPos.y -= 1;
+                    }
+                    else
+                    {
+                        blockPos.y += 1;
+                    }
+                }
+                else
+                {
+                    // blockPos.z -= (int)Mathf.RoundToInt(ray.direction.z);
+                    if (ray.direction.z > 0)
+                    {
+                        blockPos.z -= 1;
+                    }
+                    else
+                    {
+                        blockPos.z += 1;
+                    }
+                }
+
+
+                CreateBlock((int)blockPos.y, blockPos, true);
+                CheckObscuredNeighbours(blockPos);
+            }
+        }
+        */
+        #endregion
+
+        #region VR Duo Reticle Version
+        // Touch Controller Trigger States for Single Click Detection
+        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) == 0.0f)
+        {
+            primaryIndexInUse = false;
+        }
+
+        if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) == 0.0f)
+        {
+            primaryHandInUse = false;
+        }
+
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) == 0.0f)
+        {
+            secondaryIndexInUse = false;
+        }
+
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) == 0.0f)
+        {
+            secondaryHandInUse = false;
+        }
+
+        // Get Construction Mode
+        String mode = GameObject.Find("ModeMenu").GetComponent<ShowModeMenu>().getMode();
+
+        // change block type
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            blockType++;
+            if (blockType == BlockType.preview)
+            {
+                blockType = BlockType.grass;
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            blockType--;
+            if (blockType == BlockType.none)
+            {
+                blockType = BlockType.cloud;
+            }
+        }
+
+        switch(mode)
+        {
+            case "Single":
+                singleMode();
+                break;
+            case "Batch":
+                batchMode();
+                break;
+            case "Pre":
+                preMode();
+                break;
+            case "Edit":
+//                editMode();
+                break;
+            default:
+                break;
+        }
+
+        deleteMode();
+        #endregion
+    }
+
+    private void preMode()
+    {
+/*
+        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f &&
+            (primaryIndexInUse == false || OVRInput.Get(OVRInput.Touch.PrimaryThumbRest)))
+        {
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.LTouch);
+            if (rayCastAnswer.valid)
+            {
+                Vector3 baseIndex = rayCastAnswer.blockPos - landscapeStructure.center;
+                for (int i = 0; i < landscapeStructure.blockType.GetLength(0); i++)
+                {
+                    for (int j = 0; j < landscapeStructure.blockType.GetLength(1); j++)
+                    {
+                        for (int k = 0; k < landscapeStructure.blockType.GetLength(2); k++)
+                        {
+                            Vector3 curIndex = new Vector3(baseIndex.x + i, baseIndex.y + j, baseIndex.z + k);
+                            CreateCustomBlock(landscapeStructure.blockType[i, j, k], curIndex, true, false);
+                        }
+                    }
+                }
+
+                if (primaryIndexInUse == false)
+                {
+                    primaryIndexInUse = true;
+                }
+
+                // rayCastAnswer.blockPos;
+                // Debug.Log("batchStart: " + _batchStart);
+                // Debug.Log("batchEnd: " + _batchEnd);
+            }
+        }
+*/
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.5f &&
+            (secondaryIndexInUse == false || OVRInput.Get(OVRInput.Touch.SecondaryThumbRest)))
+        {
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
+            if (rayCastAnswer.valid)
+            {
+                OVRHaptics.Channels[1].Mix(new OVRHapticsClip(vibeClip_0_05));
+                Vector3 baseIndex = rayCastAnswer.blockPos - landscapeStructure.center;
+                for (int i = 0; i < landscapeStructure.blockType.GetLength(0); i++)
+                {
+                    for (int j = 0; j < landscapeStructure.blockType.GetLength(1); j++)
+                    {
+                        for (int k = 0; k < landscapeStructure.blockType.GetLength(2); k++)
+                        {
+                            Vector3 curIndex = new Vector3(baseIndex.x + i, baseIndex.y + j, baseIndex.z + k);
+                            CreateCustomBlock(landscapeStructure.blockType[i, j, k], curIndex, true, false);
+                        }
+                    }
+                }
+
+                secondaryIndexInUse = true;
+
+                // rayCastAnswer.blockPos;
+                // Debug.Log("batchStart: " + _batchStart);
+                // Debug.Log("batchEnd: " + _batchEnd);
+            }
+        }
+    }
+
+    private void batchMode()
+    {
+        if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.5f && secondaryIndexInUse == false)
+        {
+            // Switch mode to batch
+            _constructionMode = ConstructionMode.batch;
+            // ray cast to obtain the starting block
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
+            if (rayCastAnswer.valid)
+            {
+                OVRHaptics.Channels[1].Mix(new OVRHapticsClip(vibeClip_0_05));
+                _batchStart = rayCastAnswer.blockPos;
+                _batchEnd = _batchStart;
+                // Debug.Log("batchStart: " + _batchStart);
+                // Debug.Log("batchEnd: " + _batchEnd);
+            }
+        }
+        else if (_constructionMode == ConstructionMode.batch && OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.5f)
+        {
+            // ray cast to update the ending block
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
+            if (rayCastAnswer.valid)
+            {
+                _batchEnd = rayCastAnswer.blockPos;
+                // Debug.Log("batchEnd: " + _batchEnd);
+            }
+        }
+        else if (_constructionMode == ConstructionMode.batch && OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) < 0.5f)
+        {
+            // Switch to batchHeight mode for height adjustment when button B is released
+            _constructionMode = ConstructionMode.batchHeight;
+
+            OVRHaptics.Channels[1].Mix(new OVRHapticsClip(vibeClip_0_05));
+
+            // Create a rectengular base
+            // Get the heigher among the two points and match all the points with that height if possible.
+            _baseHeight = (int)Math.Max(_batchStart.y, _batchEnd.y);
+
+            // determine the right incremental starting and ending point
+            if (_batchEnd.x - _batchStart.x >= 0)
+            {
+                _xStart = (int)_batchStart.x;
+                _xEnd = (int)_batchEnd.x;
+            }
+            else
+            {
+                _xEnd = (int)_batchStart.x;
+                _xStart = (int)_batchEnd.x;
+            }
+
+            if (_batchEnd.z - _batchStart.z >= 0)
+            {
+                _zStart = (int)_batchStart.z;
+                _zEnd = (int)_batchEnd.z;
+            }
+            else
+            {
+                _zEnd = (int)_batchStart.z;
+                _zStart = (int)_batchEnd.z;
+            }
+
+            // iterate through the book keeping structure
+            // Start actually creating blocks when hits the surface
+            bool surfaceFlag = false;
+            for (int x = _xStart; x <= _xEnd; x++)
+            {
+                for (int z = _zStart; z <= _zEnd; z++)
+                {
+                    // Create Actual Blocks for the structure
+                    surfaceFlag = false;
+                    for (int y = 0; y <= _baseHeight; y++)
+                    {
+                        if (!surfaceFlag && worldBlocks[x, y, z] != null && worldBlocks[x, y, z]._vis)
+                        {
+                            surfaceFlag = true;
+                        }
+                        else if (surfaceFlag)
+                        {
+                            Vector3 blockPos = new Vector3(x, y, z);
+                            CreateCustomBlock(blockType, blockPos, true);
+                            // CreateBlock(blockPos, true);
+                            // Hide obscured neighbours
+                            CheckObscuredNeighbours(blockPos);
+                        }
+                    }
+
+                    // Create Preview Blocks for batchHeight Mode
+                    for (int y = _baseHeight + 1; y <= _height - 50; y++)
+                    {
+                        Vector3 blockPos = new Vector3(x, y, z);
+                        CreateCustomBlock(BlockType.preview, blockPos, true);
+                        // Hide obscured neighbours
+                        CheckObscuredNeighbours(blockPos);
+                    }
+                }
+            }
+
+            // Create Preview Blocks up to _height - 3 in order to be separated from the cloud.
+
+        }
+        else if (_constructionMode == ConstructionMode.batchHeight && OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.5f)
+        {
+            // Switch back to free mode since this is the last step of batch Mode
+            _constructionMode = ConstructionMode.free;
+
+            // Finish Creating the block + clean up preview blocks
+            // ray cast to get the intended height of the geometric structure
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
+            Vector3 heightPos = Vector3.zero;
+            if (rayCastAnswer.valid)
+            {
+                OVRHaptics.Channels[1].Mix(new OVRHapticsClip(vibeClip_0_05));
+                heightPos = rayCastAnswer.blockPos;
+                // Debug.Log("Intended Height: " + _batchEnd);
+            }
+            int intendedHeight = (int)Math.Max(heightPos.y, _baseHeight);
+            for (int x = _xStart; x <= _xEnd; x++)
+            {
+                for (int z = _zStart; z <= _zEnd; z++)
+                {
+                    // Create Actual Blocks for the structure up to the intended height
+                    for (int y = _baseHeight + 1; y <= intendedHeight; y++)
+                    {
+                        Vector3 blockPos = new Vector3(x, y, z);
+                        CreateCustomBlock(blockType, blockPos, true);
+                        // CreateBlock(blockPos, true);
+                        // Hide obscured neighbours
+                        CheckObscuredNeighbours(blockPos);
+                    }
+
+                    // Delete Preview Blocks that are irrelevant
+                    for (int y = intendedHeight + 1; y <= _height - 50; y++)
+                    {
+                        Vector3 blockPos = new Vector3(x, y, z);
+                        if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] != null)
+                        {
+                            Destroy(worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block);
+                            worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
+                        }
+                        // Show hidden structure underneath
+                        // Only instantiate hidden blocks when they are on demand!
+                        showHiddenBlockAround(blockPos);
+                    }
+                }
+            }
+
+            secondaryIndexInUse = true;
+        }
+    }
+
+    private void deleteMode()
+    {
+/*
+        if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) > 0.5f &&
+            (primaryHandInUse == false || OVRInput.Get(OVRInput.Touch.PrimaryThumbRest)))
+        {
+            OVRHaptics.Channels[0].Mix(new OVRHapticsClip(vibeClip_0_05));
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.LTouch);
+            if (rayCastAnswer.valid)
+            {
+                Vector3 blockPos = rayCastAnswer.blockPos;
+                // this is the bottom block. Don't delete it!!!!
+                if ((int)blockPos.y == 0) return;
+                // Delete from the structure and the Unity world
+                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
+                Destroy(rayCastAnswer.block);
+                // Show hidden structure underneath
+                // Only instantiate hidden blocks when they are on demand!
+                showHiddenBlockAround(blockPos);
+            }
+
+            primaryHandInUse = true;
+
+        }
+*/
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.5f &&
+            (secondaryHandInUse == false || OVRInput.Get(OVRInput.Touch.SecondaryThumbRest)))
+        {
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
+            if (rayCastAnswer.valid)
+            {
+                OVRHaptics.Channels[1].Mix(new OVRHapticsClip(vibeClip_0_05));
+                Vector3 blockPos = rayCastAnswer.blockPos;
+                // this is the bottom block. Don't delete it!!!!
+                if ((int)blockPos.y == 0) return;
+                // Delete from the structure and the Unity world
+                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
+                Destroy(rayCastAnswer.block);
+                // Show hidden structure underneath
+                // Only instantiate hidden blocks when they are on demand!
+                showHiddenBlockAround(blockPos);
+            }
+            if (!OVRInput.Get(OVRInput.Touch.SecondaryThumbRest))
+            {
+                secondaryHandInUse = true;
+            }
+        }
+    }
+
+    private void singleMode()
+    {
+/*
+        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f &&
+            (primaryIndexInUse == false || OVRInput.Get(OVRInput.Touch.PrimaryThumbRest)))
+        {
+            Debug.Log(OVRInput.Axis1D.PrimaryIndexTrigger);
+            Debug.Log(primaryIndexInUse);
+
+            OVRHaptics.Channels[0].Mix(new OVRHapticsClip(vibeClip_0_05));
+            RayCastReturn rayCastAnswer = rayCastBlockCreation(OVRInput.Controller.LTouch);
+            if (rayCastAnswer.valid)
+            {
+                Vector3 blockPos = rayCastAnswer.blockPos;
+                CreateCustomBlock(blockType, blockPos, true);
+                // CreateBlock(blockPos, true);
+                // Hide obscured neighbours
+                CheckObscuredNeighbours(blockPos);
+            }
+
+            primaryIndexInUse = true;
+        }
+*/
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.5f &&
+            (secondaryIndexInUse == false || OVRInput.Get(OVRInput.Touch.SecondaryThumbRest)))
+        {
+            // Debug.Log(OVRInput.Axis1D.SecondaryIndexTrigger);
+            // Debug.Log(secondaryIndexInUse);
+
+            RayCastReturn rayCastAnswer = rayCastBlockCreation(OVRInput.Controller.RTouch);
+            if (rayCastAnswer.valid)
+            {
+                OVRHaptics.Channels[1].Mix(new OVRHapticsClip(vibeClip_0_05));
+                Vector3 blockPos = rayCastAnswer.blockPos;
+                CreateCustomBlock(blockType, blockPos, true);
+                // CreateBlock(blockPos, true);
+                // Hide obscured neighbours
+                CheckObscuredNeighbours(blockPos);
+            }
+
+            secondaryIndexInUse = true;
+        }
     }
 
     private LandscapeStructure loadLandscapeStructure(string fileName)
@@ -316,424 +878,6 @@ public class Landscape : MonoBehaviour {
                         }
                     }
                 }
-    }
-    // Update is called once per frame
-    void Update() {
-
-        #region Screen Version
-        /*
-        if (Input.GetMouseButtonDown(0)) {
-            // Debug.Log("Left Botton Detected");
-            RaycastHit hit;
-            // Ray ray = Camera.allCameras[0].ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
-            // Debug.Log(ray);
-            if (Physics.Raycast(ray, out hit, 5000.0f)) {
-                Vector3 blockPos = hit.transform.position;
-
-                // this is the bottom block. Don't delete it!!!!
-                if ((int)blockPos.y == 0) return;
-
-                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
-
-                Destroy(hit.transform.gameObject);
-
-                //
-                // Show hidden structure underneath
-                // Only instantiate hidden blocks when they are on demand!
-                //
-                for (int x = -1; x <= 1; x++) {
-                    for (int y = -1; y <= 1; y++) {
-                        for (int z = -1; z <= 1; z++) {
-                            if (!(x == 0 && y == 0 && z == 0)) {
-                                Vector3 neighbour = new Vector3(blockPos.x + x, blockPos.y + y, blockPos.z + z);
-                                DrawBlock(neighbour);
-                            }
-                        }
-                    }
-                }
-            }
-        } else if (Input.GetMouseButtonDown(1)) {
-            // Debug.Log("Right Botton Detected");
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
-            // Debug.Log(ray.direction);
-            if (Physics.Raycast(ray, out hit, 5000.0f)) {
-                Vector3 blockPos = hit.transform.position;
-                Vector3 hitVector = blockPos - hit.point;
-
-                hitVector.x = Mathf.Abs(hitVector.x);
-                hitVector.y = Mathf.Abs(hitVector.y);
-                hitVector.z = Mathf.Abs(hitVector.z);
-
-                // Debug.Log(ray.direction);
-
-                if (hitVector.x > hitVector.z && hitVector.x > hitVector.y) {
-                    // blockPos.x -= (int)Mathf.RoundToInt(ray.direction.x);
-                    if (ray.direction.x > 0) {
-                        blockPos.x -= 1;
-                    } else {
-                        blockPos.x += 1;
-                    }
-                } else if (hitVector.y > hitVector.x && hitVector.y > hitVector.z) {
-                    // blockPos.y -= (int)Mathf.RoundToInt(ray.direction.y);
-                    if (ray.direction.y > 0) {
-                        blockPos.y -= 1;
-                    } else {
-                        blockPos.y += 1;
-                    }
-                } else {
-                    // blockPos.z -= (int)Mathf.RoundToInt(ray.direction.z);
-                    if (ray.direction.z > 0) {
-                        blockPos.z -= 1;
-                    } else {
-                        blockPos.z += 1;
-                    }
-                }
-
-
-                CreateBlock((int)blockPos.y, blockPos, true);
-                CheckObscuredNeighbours(blockPos);
-            }
-        }
-        */
-        #endregion
-
-        #region VR Single Reticle Version
-        /*
-        if (Input.GetMouseButtonDown(0) || Input.GetButton("Xbox_L1"))
-        {
-            RaycastHit hit;
-            // Ray ray = Camera.allCameras[0].ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
-            // Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
-            // Debug.Log(ray);
-            if (Physics.Raycast(new Ray(_CameraFacing.transform.position,
-                                     _CameraFacing.transform.rotation * Vector3.forward),
-                                     out hit, 5000.0f))
-            {
-                Vector3 blockPos = hit.transform.position;
-
-                // this is the bottom block. Don't delete it!!!!
-                if ((int)blockPos.y == 0) return;
-
-                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
-
-                Destroy(hit.transform.gameObject);
-
-                //
-                // Show hidden structure underneath
-                // Only instantiate hidden blocks when they are on demand!
-                //
-                for (int x = -1; x <= 1; x++)
-                {
-                    for (int y = -1; y <= 1; y++)
-                    {
-                        for (int z = -1; z <= 1; z++)
-                        {
-                            if (!(x == 0 && y == 0 && z == 0))
-                            {
-                                Vector3 neighbour = new Vector3(blockPos.x + x, blockPos.y + y, blockPos.z + z);
-                                DrawBlock(neighbour);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        else if (Input.GetMouseButtonDown(1) || Input.GetButton("Xbox_R1"))
-        {
-            // Debug.Log("Right Botton Detected");
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0));
-            // Debug.DrawRay(ray.origin, ray.direction * 10, Color.red);
-            // Debug.Log(ray.direction);
-            if (Physics.Raycast(new Ray(_CameraFacing.transform.position,
-                                     _CameraFacing.transform.rotation * Vector3.forward),
-                                     out hit, 5000.0f))
-            {
-                Vector3 blockPos = hit.transform.position;
-                Vector3 hitVector = blockPos - hit.point;
-
-                hitVector.x = Mathf.Abs(hitVector.x);
-                hitVector.y = Mathf.Abs(hitVector.y);
-                hitVector.z = Mathf.Abs(hitVector.z);
-
-                // Debug.Log(ray.direction);
-
-                if (hitVector.x > hitVector.z && hitVector.x > hitVector.y)
-                {
-                    // blockPos.x -= (int)Mathf.RoundToInt(ray.direction.x);
-                    if (ray.direction.x > 0)
-                    {
-                        blockPos.x -= 1;
-                    }
-                    else
-                    {
-                        blockPos.x += 1;
-                    }
-                }
-                else if (hitVector.y > hitVector.x && hitVector.y > hitVector.z)
-                {
-                    // blockPos.y -= (int)Mathf.RoundToInt(ray.direction.y);
-                    if (ray.direction.y > 0)
-                    {
-                        blockPos.y -= 1;
-                    }
-                    else
-                    {
-                        blockPos.y += 1;
-                    }
-                }
-                else
-                {
-                    // blockPos.z -= (int)Mathf.RoundToInt(ray.direction.z);
-                    if (ray.direction.z > 0)
-                    {
-                        blockPos.z -= 1;
-                    }
-                    else
-                    {
-                        blockPos.z += 1;
-                    }
-                }
-
-
-                CreateBlock((int)blockPos.y, blockPos, true);
-                CheckObscuredNeighbours(blockPos);
-            }
-        }
-        */
-        #endregion
-
-        #region VR Duo Reticle Version
-        // Touch Controller States
-        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) == 0.0f)
-        {
-            primaryIndexInUse = false;
-        }
-
-        if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) == 0.0f)
-        {
-            primaryHandInUse = false;
-        }
-
-        // change block type
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            blockType++;
-            if (blockType == BlockType.preview)
-            {
-                blockType = BlockType.grass;
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            blockType--;
-            if (blockType == BlockType.none)
-            {
-                blockType = BlockType.cloud;
-            }
-        }
-
-            if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f && primaryIndexInUse == false)
-        {
-            OVRHaptics.Channels[0].Mix(new OVRHapticsClip(vibeClip_0_05));
-            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.LTouch);
-            if (rayCastAnswer.valid)
-            {
-                Vector3 blockPos = rayCastAnswer.blockPos;
-                // this is the bottom block. Don't delete it!!!!
-                if ((int)blockPos.y == 0) return;
-                // Delete from the structure and the Unity world
-                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
-                Destroy(rayCastAnswer.block);
-                // Show hidden structure underneath
-                // Only instantiate hidden blocks when they are on demand!
-                showHiddenBlockAround(blockPos);
-            }
-
-            primaryIndexInUse = true;
-        }
-        else if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) > 0.5f && primaryHandInUse == false)
-        {
-            OVRHaptics.Channels[0].Mix(new OVRHapticsClip(vibeClip_0_05));
-            RayCastReturn rayCastAnswer = rayCastBlockCreation(OVRInput.Controller.LTouch);
-            if (rayCastAnswer.valid)
-            {
-                Vector3 blockPos = rayCastAnswer.blockPos;
-                CreateCustomBlock(blockType, blockPos, true);
-                // CreateBlock(blockPos, true);
-                // Hide obscured neighbours
-                CheckObscuredNeighbours(blockPos);
-            }
-
-            primaryHandInUse = true;
-        }
-        else if (_constructionMode == ConstructionMode.free && OVRInput.GetDown(OVRInput.RawButton.X))
-        {
-            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.LTouch);
-            if (rayCastAnswer.valid)
-            {
-                Vector3 baseIndex = rayCastAnswer.blockPos - landscapeStructure.center;
-                for (int i = 0; i < landscapeStructure.blockType.GetLength(0); i++)
-                {
-                    for (int j = 0; j < landscapeStructure.blockType.GetLength(1); j++)
-                    {
-                        for (int k = 0; k < landscapeStructure.blockType.GetLength(2); k++)
-                        {
-                            Vector3 curIndex = new Vector3(baseIndex.x + i, baseIndex.y + j, baseIndex.z + k);
-                            CreateCustomBlock(landscapeStructure.blockType[i, j, k], curIndex, true, false);
-                        }
-                    }
-                }
-
-
-                // rayCastAnswer.blockPos;
-                // Debug.Log("batchStart: " + _batchStart);
-                // Debug.Log("batchEnd: " + _batchEnd);
-            }
-        }
-        else if (_constructionMode == ConstructionMode.free && OVRInput.Get(OVRInput.RawButton.B))
-        {
-            // Switch mode to batch
-            _constructionMode = ConstructionMode.batch;
-            // ray cast to obtain the starting block
-            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
-            if (rayCastAnswer.valid)
-            {
-                _batchStart = rayCastAnswer.blockPos;
-                _batchEnd = _batchStart;
-                // Debug.Log("batchStart: " + _batchStart);
-                // Debug.Log("batchEnd: " + _batchEnd);
-            }
-        }
-        else if (_constructionMode == ConstructionMode.batch && OVRInput.Get(OVRInput.RawButton.B))
-        {
-            // ray cast to update the ending block
-            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
-            if (rayCastAnswer.valid)
-            {
-                _batchEnd = rayCastAnswer.blockPos;
-                // Debug.Log("batchEnd: " + _batchEnd);
-            }
-        }
-        else if (_constructionMode == ConstructionMode.batch && !OVRInput.Get(OVRInput.RawButton.B))
-        {
-            // Switch to batchHeight mode for height adjustment when button B is released
-            _constructionMode = ConstructionMode.batchHeight;
-
-            // Create a rectengular base
-            // Get the heigher among the two points and match all the points with that height if possible.
-            _baseHeight = (int)Math.Max(_batchStart.y, _batchEnd.y);
-
-            // determine the right incremental starting and ending point
-            if (_batchEnd.x - _batchStart.x >= 0)
-            {
-                _xStart = (int)_batchStart.x;
-                _xEnd = (int)_batchEnd.x;
-            }
-            else
-            {
-                _xEnd = (int)_batchStart.x;
-                _xStart = (int)_batchEnd.x;
-            }
-
-            if (_batchEnd.z - _batchStart.z >= 0)
-            {
-                _zStart = (int)_batchStart.z;
-                _zEnd = (int)_batchEnd.z;
-            }
-            else
-            {
-                _zEnd = (int)_batchStart.z;
-                _zStart = (int)_batchEnd.z;
-            }
-
-            // iterate through the book keeping structure
-            // Start actually creating blocks when hits the surface
-            bool surfaceFlag = false;
-            for (int x = _xStart; x <= _xEnd; x++)
-            {
-                for (int z = _zStart; z <= _zEnd; z++)
-                {
-                    // Create Actual Blocks for the structure
-                    surfaceFlag = false;
-                    for (int y = 0; y <= _baseHeight; y++)
-                    {
-                        if (!surfaceFlag && worldBlocks[x, y, z] != null && worldBlocks[x, y, z]._vis)
-                        {
-                            surfaceFlag = true;
-                        } else if (surfaceFlag)
-                        {
-                            Vector3 blockPos = new Vector3(x, y, z);
-                            CreateCustomBlock(blockType, blockPos, true);
-                            // CreateBlock(blockPos, true);
-                            // Hide obscured neighbours
-                            CheckObscuredNeighbours(blockPos);
-                        }
-                    }
-
-                    // Create Preview Blocks for batchHeight Mode
-                    for (int y = _baseHeight + 1; y <= _height - 50; y++)
-                    {
-                        Vector3 blockPos = new Vector3(x, y, z);
-                        CreateCustomBlock(BlockType.preview, blockPos, true);
-                        // Hide obscured neighbours
-                        CheckObscuredNeighbours(blockPos);
-                    }
-                }
-            }
-
-            // Create Preview Blocks up to _height - 3 in order to be separated from the cloud.
-
-        }
-        else if (_constructionMode == ConstructionMode.batchHeight && OVRInput.Get(OVRInput.RawButton.A))
-        {
-            // Switch back to free mode since this is the last step of batch Mode
-            _constructionMode = ConstructionMode.free;
-
-            // Finish Creating the block + clean up preview blocks
-            // ray cast to get the intended height of the geometric structure
-            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
-            Vector3 heightPos = Vector3.zero;
-            if (rayCastAnswer.valid)
-            {
-                heightPos = rayCastAnswer.blockPos;
-                // Debug.Log("Intended Height: " + _batchEnd);
-            }
-            int intendedHeight = (int)Math.Max(heightPos.y, _baseHeight);
-            for (int x = _xStart; x <= _xEnd; x++)
-            {
-                for (int z = _zStart; z <= _zEnd; z++)
-                {
-                    // Create Actual Blocks for the structure up to the intended height
-                    for (int y = _baseHeight + 1; y <= intendedHeight; y++)
-                    {
-                        Vector3 blockPos = new Vector3(x, y, z);
-                        CreateCustomBlock(blockType, blockPos, true);
-                        // CreateBlock(blockPos, true);
-                        // Hide obscured neighbours
-                        CheckObscuredNeighbours(blockPos);
-                    }
-
-                    // Delete Preview Blocks that are irrelevant
-                    for (int y = intendedHeight + 1; y <= _height - 50; y++)
-                    {
-                        Vector3 blockPos = new Vector3(x, y, z);
-                        if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] != null)
-                        {
-                            Destroy(worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block);
-                            worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] = null;
-                        }
-                        // Show hidden structure underneath
-                        // Only instantiate hidden blocks when they are on demand!
-                        showHiddenBlockAround(blockPos);
-                    }
-                }
-            }
-        }
-        #endregion
     }
 
     private void showHiddenBlockAround(Vector3 blockPos)

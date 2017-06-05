@@ -19,7 +19,7 @@ public class SearchObj : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        string mainMode = GameObject.Find("CrossHairCanvas").GetComponent<ShowMainMenu>().getMode();
+        string mainMode = GameObject.Find("CrossHairCanvas").GetComponent<ShowModeMenu>().getMode();
 
         switch (mainMode)
         {
