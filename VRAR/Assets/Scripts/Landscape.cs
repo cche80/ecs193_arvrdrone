@@ -64,13 +64,16 @@ public class Landscape : MonoBehaviour {
     public AudioClip vibeClip_0_05;
 
     // Touch Controller
-    bool primaryIndexInUse = false;
-    bool primaryHandInUse = false;
-    bool secondaryIndexInUse = false;
-    bool secondaryHandInUse = false;
+    private bool primaryIndexInUse = false;
+    private bool primaryHandInUse = false;
+    private bool secondaryIndexInUse = false;
+    private bool secondaryHandInUse = false;
 
     // Change Texture/bricktype
-    BlockType blockType = BlockType.grass;
+    private BlockType blockType = BlockType.grass;
+
+    // Preview Block reference
+    private GameObject singlePreviewBlock = null;
 
     // Use this for initialization
     void Start() {
@@ -339,6 +342,7 @@ public class Landscape : MonoBehaviour {
         switch(mode)
         {
             case "Single":
+                // singlePreview();
                 singleMode();
                 break;
             case "Batch":
@@ -357,6 +361,38 @@ public class Landscape : MonoBehaviour {
         deleteMode();
         #endregion
     }
+
+/*
+    private void singlePreview()
+    {
+        RayCastReturn rayCastAnswer = rayCastBlockCreation(OVRInput.Controller.RTouch);
+        if (rayCastAnswer.valid)
+        {
+            Vector3 blockPos = rayCastAnswer.blockPos;
+            // Overflow prevention and clean up
+            if (blockPos.x < 0 || blockPos.x >= _width || blockPos.y < 0 || blockPos.y >= _height || blockPos.z < 0 || blockPos.x >= _depth) return;
+            if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] != null &&
+                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block == singlePreviewBlock)
+            {
+                return;
+            }
+            else if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] == null)
+            {
+                // delete the previous singlePreviewBlock
+                if (singlePreviewBlock != null)
+                {
+                    Destroy(singlePreviewBlock);
+                }
+
+                CreateCustomBlock(blockType, blockPos, true, false);
+                singlePreviewBlock = worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block;
+                singlePreviewBlock.transform.GetComponent<BoxCollider>().enabled = false;
+                Renderer rend = singlePreviewBlock.transform.GetComponent<Renderer>();
+                rend.material.SetColor("_EmissionColor", Color.grey);
+            }
+        }
+    }
+*/
 
     private void preMode()
     {

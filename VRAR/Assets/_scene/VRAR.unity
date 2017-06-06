@@ -2479,7 +2479,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rawimage: {fileID: 1839928243}
-  N_camera: 1
+  N_camera: 0
 --- !u!114 &1839928243
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -3,39 +3,68 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ObjMenu : MonoBehaviour {
-    // Array of menu item control names.
-    string[] menuOptions = new string[] { "Move", "Color", "Texture" };
+public class ObjMenu : MonoBehaviour
+{
+    public Sprite TGgrass;
+    public Sprite TGsand;
+    public Sprite TGsnow;
+    public Sprite TGpreview = null;
+    public bool previewFlag = true;
 
-    //Default selected menu item
-    int selectedIndex = 1;
-
-	// Use this for initialization
-	void Start () {
-        GameObject.Find(menuOptions[selectedIndex].ToString()).transform.GetComponent<Image>().color = new Vector4(1, 1, 1, 1);
-    }
-	
-	// Update is called once per frame
-	void Update () {
-        if (Input.GetKeyDown(KeyCode.A))
+    string[] itemOptions = new string[] { "grass", "sand", "snow", "preview" };
+    int selectedIndex = 3;
+    private Image r;
+    private GameObject pcp;
+    // Use this for initialization
+    void Start()
+    {
+        r = GameObject.Find("PreviewImage").GetComponent<Image>();
+        pcp = GameObject.Find("PresetColor");
+        if (transform.parent.GetComponent<Renderer>().material.name == "TGgrass")
         {
-            GameObject.Find(menuOptions[selectedIndex].ToString()).transform.GetComponent<Image>().color = new Vector4(1, 1, 1, .5f);
+            r.sprite = TGgrass;
+            r.color = new Vector4(1, 1, 1, 1);
+            selectedIndex = 0;
+        }
+        else if (transform.parent.GetComponent<Renderer>().material.name == "TGsand")
+        {
+            r.sprite = TGsand;
+            r.color = new Vector4(1, 1, 1, 1);
+            selectedIndex = 1;
+        }
+        else if (transform.parent.GetComponent<Renderer>().material.name == "TGsnow")
+        {
+            r.sprite = TGsnow;
+            r.color = new Vector4(1, 1, 1, 1);
+            selectedIndex = 2;
+        }
+        else
+        {
+            r.sprite = null;
+            r.color = transform.parent.GetComponent<Renderer>().material.color;
+            selectedIndex = 3;
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
             if (selectedIndex == 0)
             {
-                selectedIndex = menuOptions.Length - 1;
+                selectedIndex = itemOptions.Length - 1;
             }
             else
             {
                 selectedIndex -= 1;
             }
-            GameObject.Find(menuOptions[selectedIndex].ToString()).transform.GetComponent<Image>().color = new Vector4(1, 1, 1, 1);
+            updatehelper();
         }
 
-        if (Input.GetKeyDown(KeyCode.D))
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            GameObject.Find(menuOptions[selectedIndex].ToString()).transform.GetComponent<Image>().color = new Vector4(1, 1, 1, .5f);
-            
-            if (selectedIndex == menuOptions.Length - 1)
+            if (selectedIndex == itemOptions.Length - 1)
             {
                 selectedIndex = 0;
             }
@@ -43,38 +72,46 @@ public class ObjMenu : MonoBehaviour {
             {
                 selectedIndex += 1;
             }
-            GameObject.Find(menuOptions[selectedIndex].ToString()).transform.GetComponent<Image>().color = new Vector4(1, 1, 1, 1);
-
+            updatehelper();
         }
 
+
+
+
+
+    }
+
+    void updatehelper()
+    {
         switch (selectedIndex)
         {
             case 0:
-                moveObj();
+                r.sprite = TGgrass;
+                r.color = new Vector4(1, 1, 1, 1);
+                GameObject.Find("PresetColor").GetComponent<Image>().color = new Vector4(.8f, .8f, .8f, .2f);
+                previewFlag = false;
                 break;
             case 1:
-                changeColor();
+                r.sprite = TGsand;
+                r.color = new Vector4(1, 1, 1, 1);
+                GameObject.Find("PresetColor").GetComponent<Image>().color = new Vector4(.8f, .8f, .8f, .2f);
+                previewFlag = false;
                 break;
             case 2:
-                changeTexture();
+                r.sprite = TGsnow;
+                r.color = new Vector4(1, 1, 1, 1);
+                GameObject.Find("PresetColor").GetComponent<Image>().color = new Vector4(.8f, .8f, .8f, .2f);
+                previewFlag = false;
+                break;
+            case 3:
+                r.sprite = TGpreview;
+                r.color = pcp.GetComponent<MyColorPicker>().color;
+                GameObject.Find("PresetColor").GetComponent<Image>().color = new Vector4(1, 1, 1, 1);
+                previewFlag = true;
                 break;
             default:
                 break;
         }
     }
-    
-    private void moveObj()
-    {
 
-    }
-
-    private void changeColor()
-    {
-
-    }
-
-    private void changeTexture()
-    {
-
-    }
 }
