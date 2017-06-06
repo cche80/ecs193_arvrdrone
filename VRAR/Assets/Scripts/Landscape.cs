@@ -58,6 +58,12 @@ public class Landscape : MonoBehaviour {
     int _zStart, _zEnd;
     int _baseHeight;
 
+    //Edit Mode Variables
+    public GameObject objMenuPrefab;
+    bool select_state = false;
+    GameObject hoverGO;
+    GameObject objectMenu;
+
     // Pre-constructed landscape
     LandscapeStructure landscapeStructure;
 
@@ -346,55 +352,107 @@ public class Landscape : MonoBehaviour {
             case "Single":
                 // singlePreview();
                 singleMode();
+                deleteMode();
                 break;
             case "Batch":
                 batchMode();
+                deleteMode();
                 break;
             case "Pre":
                 preMode();
+                deleteMode();
                 break;
             case "Edit":
-//                editMode();
+                editMode();
                 break;
             default:
                 break;
         }
-
-        deleteMode();
         #endregion
     }
 
-/*
-    private void singlePreview()
+    private void editMode()
     {
-        RayCastReturn rayCastAnswer = rayCastBlockCreation(OVRInput.Controller.RTouch);
-        if (rayCastAnswer.valid)
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.5f && secondaryIndexInUse == false)
         {
-            Vector3 blockPos = rayCastAnswer.blockPos;
-            // Overflow prevention and clean up
-            if (blockPos.x < 0 || blockPos.x >= _width || blockPos.y < 0 || blockPos.y >= _height || blockPos.z < 0 || blockPos.x >= _depth) return;
-            if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] != null &&
-                worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block == singlePreviewBlock)
+            if (select_state == true)
             {
-                return;
+                editDeleteObjectMenu();
             }
-            else if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] == null)
+
+            // create a new instance
+            RayCastReturn rayCastAnswer = rayCastBlockDeletion(OVRInput.Controller.RTouch);
+            if (rayCastAnswer.valid)
             {
-                // delete the previous singlePreviewBlock
-                if (singlePreviewBlock != null)
+                hoverGO = rayCastAnswer.block;
+                objectMenu = Instantiate(objMenuPrefab);
+                objectMenu.transform.SetParent(hoverGO.transform);
+                objectMenu.name = "ObjectMenu";
+                objectMenu.transform.position = rayCastAnswer.blockPos;
+                Renderer rend = rayCastAnswer.block.GetComponent<Renderer>();
+
+                if (rend)
                 {
-                    Destroy(singlePreviewBlock);
+                    rend.material.SetColor("_EmissionColor", Color.grey);
                 }
 
-                CreateCustomBlock(blockType, blockPos, true, false);
-                singlePreviewBlock = worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block;
-                singlePreviewBlock.transform.GetComponent<BoxCollider>().enabled = false;
-                Renderer rend = singlePreviewBlock.transform.GetComponent<Renderer>();
-                rend.material.SetColor("_EmissionColor", Color.grey);
+                select_state = true;
             }
+
+                secondaryIndexInUse = true;
+        }
+        else if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.5f &&
+            secondaryHandInUse == false && select_state == true)
+        {
+            editDeleteObjectMenu();
+            secondaryHandInUse = true;
+        }
+        else if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick))
+        {
+            // apply changes
         }
     }
-*/
+
+    private void editDeleteObjectMenu()
+    {
+        Destroy(hoverGO.transform.FindChild("ObjectMenu").gameObject);
+        Renderer rend = hoverGO.transform.GetComponent<Renderer>();
+        rend.material.SetColor("_EmissionColor", Color.black);
+        hoverGO = null;
+        select_state = false;
+    }
+
+    /*
+        private void singlePreview()
+        {
+            RayCastReturn rayCastAnswer = rayCastBlockCreation(OVRInput.Controller.RTouch);
+            if (rayCastAnswer.valid)
+            {
+                Vector3 blockPos = rayCastAnswer.blockPos;
+                // Overflow prevention and clean up
+                if (blockPos.x < 0 || blockPos.x >= _width || blockPos.y < 0 || blockPos.y >= _height || blockPos.z < 0 || blockPos.x >= _depth) return;
+                if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] != null &&
+                    worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block == singlePreviewBlock)
+                {
+                    return;
+                }
+                else if (worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z] == null)
+                {
+                    // delete the previous singlePreviewBlock
+                    if (singlePreviewBlock != null)
+                    {
+                        Destroy(singlePreviewBlock);
+                    }
+
+                    CreateCustomBlock(blockType, blockPos, true, false);
+                    singlePreviewBlock = worldBlocks[(int)blockPos.x, (int)blockPos.y, (int)blockPos.z]._block;
+                    singlePreviewBlock.transform.GetComponent<BoxCollider>().enabled = false;
+                    Renderer rend = singlePreviewBlock.transform.GetComponent<Renderer>();
+                    rend.material.SetColor("_EmissionColor", Color.grey);
+                }
+            }
+        }
+    */
 
     private void preMode()
     {

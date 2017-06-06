@@ -7,7 +7,7 @@ public class FacingCamera : MonoBehaviour {
     // Use this for initialization
     void Start () {
         transform.position += new Vector3(0, transform.parent.gameObject.transform.lossyScale.y + 1, 0);
-        character = GameObject.Find("FPSController");
+        character = GameObject.Find("OVRCameraRig");
 	}
 	
 	// Update is called once per frame
