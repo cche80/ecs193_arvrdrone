@@ -42,6 +42,7 @@ public class Landscape : MonoBehaviour {
     public GameObject _snowBlock;
     public GameObject _cloudBlock;
     public GameObject _previewBlock;
+    public GameObject _presetColorPicker;
 
     // GameObjects Mapping array with their enum?
 
@@ -69,8 +70,9 @@ public class Landscape : MonoBehaviour {
     private bool secondaryIndexInUse = false;
     private bool secondaryHandInUse = false;
 
-    // Change Texture/bricktype
-    private BlockType blockType = BlockType.grass;
+    // Change Texture/bricktype and color
+    private BlockType blockType = BlockType.cloud;
+    private Vector4 _color = new Vector4(1.0f, 0f, 0f, 0.55f);
 
     // Preview Block reference
     private GameObject singlePreviewBlock = null;
@@ -826,8 +828,15 @@ public class Landscape : MonoBehaviour {
             Renderer rend = newBlock.transform.GetComponent<Renderer>();
             if (rend)
             {
-                GameObject pcp = GameObject.Find("PresetColorPicker");
-                rend.material.SetColor("_Color", pcp.GetComponent<MyColorPicker>().color);
+                /*
+                Debug.Log(_presetColorPicker.GetComponent<MyColorPicker>().color);
+                if (_presetColorPicker.activeInHierarchy)
+                {
+                    _color = _presetColorPicker.GetComponent<MyColorPicker>().color;
+                }
+                */
+                // Debug.Log(_color);
+                rend.material.SetColor("_Color", _color);
             }
         }
     }
@@ -1039,5 +1048,24 @@ public class Landscape : MonoBehaviour {
     {
         public BlockType[,,] blockType;
         public Vector3 center;
+    }
+
+    public void setBlockType(int blockTypeInt)
+    {
+        if (blockTypeInt >= 5)
+        {
+            blockType = BlockType.grass;
+        } else if (blockTypeInt <= 0)
+        {
+            blockType = BlockType.cloud;
+        } else
+        {
+            blockType = (BlockType)blockTypeInt;
+        }
+    }
+
+    public void setColor(Vector4 color)
+    {
+        _color = color;
     }
 }

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class MyColorPicker : MonoBehaviour {
     public Scrollbar scrollbar;
     public Color color;
+    public GameObject landscape;
 
     /// <summary>
     /// In other script, the following code would be an example to fetch the color
@@ -22,6 +23,7 @@ public class MyColorPicker : MonoBehaviour {
         scrollbar.enabled = false;
     }
 	
+
 	// Update is called once per frame
 	void Update () {
         //value from 0 - 1
@@ -29,11 +31,11 @@ public class MyColorPicker : MonoBehaviour {
         //      from (0, 255, 0) to (0, 255, 255) to (0, 0, 255)
         //      from (0, 0, 255) to (255, 0, 255) to (255, 0, 0)
 
-        if (Input.GetKey(KeyCode.LeftArrow))
+        if (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y > 0.5f)
         {
             scrollbar.value -= .005f;
         }
-        else if (Input.GetKey(KeyCode.RightArrow))
+        else if (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y < -0.5f)
         {
             scrollbar.value += .005f;
         }
@@ -62,6 +64,7 @@ public class MyColorPicker : MonoBehaviour {
         {
             color = new Color(1f, 0f, (float)(1f - ((float)scrollbar.value - ((float)5 / 6)) * 6f));
         }
-        
+
+        landscape.GetComponent<Landscape>().setColor(color);
     }
 }

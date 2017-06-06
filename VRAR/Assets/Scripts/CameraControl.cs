@@ -8,6 +8,7 @@ using UnityEngine.VR;
 public class CameraControl : MonoBehaviour {
     public bool DEBUG = false;
     public Camera _camera;
+    public GameObject previewMenuController;
 
     #region GPS and Serial Variables
     private string DEVICE;
@@ -162,7 +163,12 @@ public class CameraControl : MonoBehaviour {
             }
         } else {
             // ccmove();
-            playerControl();
+            // playerControl();
+            if (!previewMenuController.GetComponent<PreviewMenuController>().instantiationState())
+            {
+                playerControl();
+            }
+
             if (Input.GetKeyDown(KeyCode.C)) {
                 playerControlFlg = false;
             }

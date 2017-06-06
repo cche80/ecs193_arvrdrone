@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SwitchItem : MonoBehaviour
-{
+public class SwitchItem : MonoBehaviour {
+    public GameObject landscape;
     public Material TGgrass;
     public Material TGsand;
     public Material TGsnow;
@@ -12,18 +12,33 @@ public class SwitchItem : MonoBehaviour
     public bool previewFlag = true;
 
     string[] itemOptions = new string[] { "grass", "sand", "snow", "preview" };
-    int selectedIndex = 3;
+    int selectedIndex;
+
+    // botton state:
+    bool secondaryRightInUse;
+    bool secondaryLeftInUse;
 
     // Use this for initialization
-    void Start()
-    {
-
+    void Start () {
+        selectedIndex = 3;
+        secondaryRightInUse = false;
+        secondaryLeftInUse = false;
     }
+	
+	// Update is called once per frame
+	void Update () {
+        if (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).x < 0.5f)
+        {
+            secondaryRightInUse = false;
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).x > -0.5f)
+        {
+            secondaryLeftInUse = false;
+        }
+
+        // Debug.Log(OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).x);
+        if (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).x < -0.5f && secondaryLeftInUse == false)
         {
             if (selectedIndex == 0)
             {
@@ -34,9 +49,12 @@ public class SwitchItem : MonoBehaviour
                 selectedIndex -= 1;
             }
             updatehelper();
+
+            secondaryLeftInUse = true;
+            landscape.GetComponent<Landscape>().setBlockType(selectedIndex + 1);
         }
 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).x > 0.5f && secondaryRightInUse == false)
         {
             if (selectedIndex == itemOptions.Length - 1)
             {
@@ -47,10 +65,10 @@ public class SwitchItem : MonoBehaviour
                 selectedIndex += 1;
             }
             updatehelper();
+
+            secondaryRightInUse = true;
+            landscape.GetComponent<Landscape>().setBlockType(selectedIndex + 1);
         }
-
-
-
     }
 
     void updatehelper()
@@ -84,5 +102,10 @@ public class SwitchItem : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    public int getIndex()
+    {
+        return selectedIndex;
     }
 }
