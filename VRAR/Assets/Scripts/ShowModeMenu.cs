@@ -37,6 +37,7 @@ public class ShowModeMenu : MonoBehaviour {
                 selectedIndex -= 1;
             }
             GameObject.Find(menuOptions[selectedIndex]).transform.GetComponent<Image>().color = new Vector4(1, 1, 1, 1);
+            GameObject.Find("ShowModeText").GetComponent<Text>().text = menuOptions[selectedIndex];
         }
     }
 
@@ -54,6 +55,7 @@ public class ShowModeMenu : MonoBehaviour {
                 selectedIndex += 1;
             }
             GameObject.Find(menuOptions[selectedIndex]).transform.GetComponent<Image>().color = new Vector4(1, 1, 1, 1);
+            GameObject.Find("ShowModeText").GetComponent<Text>().text = menuOptions[selectedIndex];
         }
     }
 
