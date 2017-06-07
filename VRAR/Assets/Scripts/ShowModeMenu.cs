@@ -9,12 +9,14 @@ public class ShowModeMenu : MonoBehaviour {
     int selectedIndex = 0;
     public GameObject previewMenuController;
     public GameObject modeMenu;
+    public GameObject landscape;
 
     bool paused = false;
 	
 	// Update is called once per frame
 	void Update () {
-        if (!previewMenuController.GetComponent<PreviewMenuController>().instantiationState())
+        if (!previewMenuController.GetComponent<PreviewMenuController>().instantiationState() &&
+            !landscape.GetComponent<Landscape>().getObjectMenuSelect())
         {
             ToggleMenu();
             NextMode();

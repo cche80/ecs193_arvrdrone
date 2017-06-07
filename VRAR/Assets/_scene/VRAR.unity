@@ -198,6 +198,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   previewMenuController: {fileID: 1176341365}
   modeMenu: {fileID: 27659913}
+  landscape: {fileID: 537547715}
 --- !u!1 &72418047 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 1414505579296190, guid: 63073bdcaaf9079488bd34b60a3ea091,
@@ -305,6 +306,7 @@ MonoBehaviour:
   DEBUG: 0
   _camera: {fileID: 0}
   previewMenuController: {fileID: 0}
+  landscape: {fileID: 0}
   LAT: 0
   LON: 0
   m_VRNode: 3
@@ -743,6 +745,7 @@ MonoBehaviour:
   _previewBlock: {fileID: 1413004990233084, guid: efc293496f912a94598b447cd7c5b724,
     type: 2}
   _presetColorPicker: {fileID: 1521745340}
+  _modeMenu: {fileID: 27659913}
   objMenuPrefab: {fileID: 1795466883688312, guid: 8679cba969bb8144abfa48cb5b2c9916,
     type: 2}
   vibeClip_0_05: {fileID: 8300000, guid: 658573add58f11d43bbabe25a323be5d, type: 3}
@@ -2047,6 +2050,7 @@ MonoBehaviour:
   DEBUG: 0
   _camera: {fileID: 1839081723}
   previewMenuController: {fileID: 1176341365}
+  landscape: {fileID: 537547715}
   LAT: 0
   LON: 0
   m_VRNode: 3

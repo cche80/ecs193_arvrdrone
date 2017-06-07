@@ -43,6 +43,7 @@ public class Landscape : MonoBehaviour {
     public GameObject _cloudBlock;
     public GameObject _previewBlock;
     public GameObject _presetColorPicker;
+    public GameObject _modeMenu;
 
     // GameObjects Mapping array with their enum?
 
@@ -373,7 +374,8 @@ public class Landscape : MonoBehaviour {
 
     private void editMode()
     {
-        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.5f && secondaryIndexInUse == false)
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.5f && secondaryIndexInUse == false &&
+            !_modeMenu.GetComponent<ShowModeMenu>().Enabled())
         {
             if (select_state == true)
             {
@@ -1125,5 +1127,10 @@ public class Landscape : MonoBehaviour {
     public void setColor(Vector4 color)
     {
         _color = color;
+    }
+
+    public bool getObjectMenuSelect()
+    {
+        return select_state;
     }
 }

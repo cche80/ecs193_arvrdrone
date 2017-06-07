@@ -9,6 +9,7 @@ public class CameraControl : MonoBehaviour {
     public bool DEBUG = false;
     public Camera _camera;
     public GameObject previewMenuController;
+    public GameObject landscape;
 
     #region GPS and Serial Variables
     private string DEVICE;
@@ -164,7 +165,8 @@ public class CameraControl : MonoBehaviour {
         } else {
             // ccmove();
             // playerControl();
-            if (!previewMenuController.GetComponent<PreviewMenuController>().instantiationState())
+            if (!previewMenuController.GetComponent<PreviewMenuController>().instantiationState() &&
+                !landscape.GetComponent<Landscape>().getObjectMenuSelect())
             {
                 playerControl();
             }
