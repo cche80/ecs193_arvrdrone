@@ -329,25 +329,6 @@ public class Landscape : MonoBehaviour {
         // Get Construction Mode
         String mode = GameObject.Find("ModeMenu").GetComponent<ShowModeMenu>().getMode();
 
-        // change block type
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            blockType++;
-            if (blockType == BlockType.preview)
-            {
-                blockType = BlockType.grass;
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            blockType--;
-            if (blockType == BlockType.none)
-            {
-                blockType = BlockType.cloud;
-            }
-        }
-
         switch(mode)
         {
             case "Single":

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class MyColorPicker : MonoBehaviour {
     public Scrollbar scrollbar;
     public Color color;
-    public GameObject landscape;
+    // public GameObject landscape;
 
     /// <summary>
     /// In other script, the following code would be an example to fetch the color
@@ -65,6 +65,7 @@ public class MyColorPicker : MonoBehaviour {
             color = new Color(1f, 0f, (float)(1f - ((float)scrollbar.value - ((float)5 / 6)) * 6f));
         }
 
-        landscape.GetComponent<Landscape>().setColor(color);
+        GameObject.Find("Landscape").GetComponent<Landscape>().setColor(color);
+        // landscape.GetComponent<Landscape>().setColor(color);
     }
 }

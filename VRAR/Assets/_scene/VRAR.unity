@@ -746,7 +746,7 @@ MonoBehaviour:
     type: 2}
   _presetColorPicker: {fileID: 1521745340}
   _modeMenu: {fileID: 27659913}
-  objMenuPrefab: {fileID: 1795466883688312, guid: 8679cba969bb8144abfa48cb5b2c9916,
+  objMenuPrefab: {fileID: 1317491066144346, guid: c1ffce83e3fe98646a0a152acf682454,
     type: 2}
   vibeClip_0_05: {fileID: 8300000, guid: 658573add58f11d43bbabe25a323be5d, type: 3}
 --- !u!1 &602375242
