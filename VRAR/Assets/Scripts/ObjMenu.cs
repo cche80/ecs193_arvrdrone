@@ -8,7 +8,7 @@ public class ObjMenu : MonoBehaviour
     public Sprite TGgrass;
     public Sprite TGsand;
     public Sprite TGsnow;
-    public Sprite TGpreview = null;
+    public Sprite TGpreview;
     public bool previewFlag = true;
 
     string[] itemOptions = new string[] { "grass", "sand", "snow", "preview" };
@@ -18,30 +18,35 @@ public class ObjMenu : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        r = GameObject.Find("PreviewImage").GetComponent<Image>();
+        r = GameObject.Find("ObjPreviewImage").GetComponent<Image>();
         pcp = GameObject.Find("PresetColor");
-        if (transform.parent.GetComponent<Renderer>().material.name == "TGgrass")
+        if (transform.parent.GetComponent<Renderer>().material.name == "TGrass (Instance)")
         {
             r.sprite = TGgrass;
             r.color = new Vector4(1, 1, 1, 1);
+            pcp.GetComponent<Image>().color = new Vector4(.8f, .8f, .8f, .2f);
             selectedIndex = 0;
         }
-        else if (transform.parent.GetComponent<Renderer>().material.name == "TGsand")
+        else if (transform.parent.GetComponent<Renderer>().material.name == "TSand (Instance)")
         {
             r.sprite = TGsand;
             r.color = new Vector4(1, 1, 1, 1);
+            pcp.GetComponent<Image>().color = new Vector4(.8f, .8f, .8f, .2f);
             selectedIndex = 1;
         }
-        else if (transform.parent.GetComponent<Renderer>().material.name == "TGsnow")
+        else if (transform.parent.GetComponent<Renderer>().material.name == "TSnow (Instance)")
         {
             r.sprite = TGsnow;
             r.color = new Vector4(1, 1, 1, 1);
+            pcp.GetComponent<Image>().color = new Vector4(.8f, .8f, .8f, .2f);
             selectedIndex = 2;
         }
         else
         {
-            r.sprite = null;
-            r.color = transform.parent.GetComponent<Renderer>().material.color;
+            r.sprite = TGpreview;
+            r.color = new Vector4(transform.parent.GetComponent<Renderer>().material.color.r,
+                                    transform.parent.GetComponent<Renderer>().material.color.g,
+                                    transform.parent.GetComponent<Renderer>().material.color.b, 1);
             selectedIndex = 3;
         }
     }
@@ -49,7 +54,7 @@ public class ObjMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstickLeft))
         {
             if (selectedIndex == 0)
             {
@@ -62,7 +67,7 @@ public class ObjMenu : MonoBehaviour
             updatehelper();
         }
 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstickRight))
         {
             if (selectedIndex == itemOptions.Length - 1)
             {
@@ -75,7 +80,10 @@ public class ObjMenu : MonoBehaviour
             updatehelper();
         }
 
-
+        if(selectedIndex == 3 && pcp)
+        {
+            r.color = pcp.GetComponent<MyColorPicker>().color;
+        }
 
 
 
@@ -114,4 +122,8 @@ public class ObjMenu : MonoBehaviour
         }
     }
 
+    public int getMaterialState()
+    {
+        return selectedIndex;
+    }
 }

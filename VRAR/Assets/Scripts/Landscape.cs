@@ -356,7 +356,7 @@ public class Landscape : MonoBehaviour {
     private void editMode()
     {
         if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.5f && secondaryIndexInUse == false &&
-            !_modeMenu.GetComponent<ShowModeMenu>().Enabled())
+            !_modeMenu.GetComponent<ShowModeMenu>().Enabled() && select_state == false)
         {
             if (select_state == true)
             {
@@ -390,9 +390,28 @@ public class Landscape : MonoBehaviour {
             editDeleteObjectMenu();
             secondaryHandInUse = true;
         }
-        else if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick))
+        else if (OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick) && select_state == true)
         {
-            // apply changes
+            switch (objectMenu.GetComponent<ObjMenu>().getMaterialState())
+            {
+                case 0:
+                    hoverGO.GetComponent<Renderer>().material = _grassBlock.GetComponent<Renderer>().sharedMaterial;
+                    break;
+                case 1:
+                    hoverGO.GetComponent<Renderer>().material = _sandBlock.GetComponent<Renderer>().sharedMaterial;
+                    break;
+                case 2:
+                    hoverGO.GetComponent<Renderer>().material = _snowBlock.GetComponent<Renderer>().sharedMaterial;
+                    break;
+                case 3:
+                    hoverGO.GetComponent<Renderer>().material = _cloudBlock.GetComponent<Renderer>().sharedMaterial;
+                    hoverGO.GetComponent<Renderer>().material.color = _color;
+                    break;
+                default:
+                    break;
+            }
+            editDeleteObjectMenu();
+            secondaryHandInUse = true;
         }
     }
 
